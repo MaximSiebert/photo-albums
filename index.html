@@ -11,7 +11,9 @@
 
     <script>
         // Configuration - set your Cloudflare R2 public URL here
-        const IMAGE_CDN_URL = 'https://pub-56fc011d92464c39a31d846e70190c70.r2.dev'; // Replace with your R2 public URL
+        const IMAGE_CDN_URL = 'https://pub-56fc011d92464c39a31d846e70190c70.r2.dev';
+        
+
         
         let state = {
             view: 'index',
@@ -24,13 +26,13 @@
         async function loadAlbums() {
             try {
                 // Fetch the albums list
-                const response = await fetch('/albums/albums.json');
+                const response = await fetch('./albums/albums.json');
                 const albumsList = await response.json();
                 
                 // Load each album's photos
                 for (const albumId of albumsList.albums) {
                     try {
-                        const photosResponse = await fetch(`/albums/${albumId}/photos.json`);
+                        const photosResponse = await fetch(`./albums/${albumId}/photos.json`);
                         const photosData = await photosResponse.json();
                         state.albums[albumId] = {
                             name: photosData.name || albumId,
