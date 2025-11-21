@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Albums</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // Configuration - set your Cloudflare R2 public URL here
+        const IMAGE_CDN_URL = 'https://pub-56fc011d92464c39a31d846e70190c70.r2.dev'; // Replace with your R2 public URL
+        
+        let state = {
+            view: 'index',
+            currentAlbum: null,
+            currentPhoto: 1,
+            albums: {}
+        };
+
+        // Load albums from folders
+        async function loadAlbums() {
+            try {
+                // Fetch the albums list
+                const response = await fetch('/albums/albums.json');
+                const albumsList = await response.json();
+                
+                // Load each album's photos
+                for (const albumId of albumsList.albums) {
+                    try {
+                        const photosResponse = await fetch(`/albums/${albumId}/photos.json`);
+                        const photosData = await photosResponse.json();
+                        state.albums[albumId] = {
+                            name: photosData.name || albumId,
+                            photos: photosData.photos,
+                            created: photosData.created || null
+                        };
+                    } catch (e) {
+                        console.error(`Failed to load album ${albumId}:`, e);
+                    }
+                }
+                
+                render();
+            } catch (e) {
+                console.error('Failed to load albums:', e);
+                document.getElementById('app').innerHTML = '<p>Error loading albums. Make sure /albums/albums.json exists.</p>';
+            }
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.view === 'index') {
+                app.innerHTML = `
+                    <div>
+                        <h1>Photo Albums</h1>
+                        <ul id="album-list"></ul>
+                    </div>
+                `;
+                
+                const list = document.getElementById('album-list');
+                
+                if (Object.keys(state.albums).length === 0) {
+                    list.innerHTML = '<li>No albums found</li>';
+                    return;
+                }
+                
+                Object.entries(state.albums).forEach(([id, album]) => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = '#';
+                    
+                    // Add cover image if available
+                    if (album.photos && album.photos.length > 0) {
+                        const img = document.createElement('img');
+                        img.src = `${IMAGE_CDN_URL}/albums/${id}/${album.photos[0]}`;
+                        img.alt = album.name;
+                        a.appendChild(img);
+                    }
+                    
+                    const title = document.createElement('div');
+                    title.textContent = album.name;
+                    a.appendChild(title);
+                    
+                    const count = document.createElement('div');
+                    count.textContent = `${album.photos.length} photos`;
+                    a.appendChild(count);
+                    
+                    if (album.created) {
+                        const date = document.createElement('div');
+                        const dateObj = new Date(album.created);
+                        date.textContent = dateObj.toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        });
+                        a.appendChild(date);
+                    }
+                    
+                    a.onclick = (e) => {
+                        e.preventDefault();
+                        openAlbum(id);
+                    };
+                    li.appendChild(a);
+                    list.appendChild(li);
+                });
+            } else {
+                const album = state.albums[state.currentAlbum];
+                const currentPhotoFilename = album.photos[state.currentPhoto - 1];
+                const isLastPhoto = state.currentPhoto >= album.photos.length;
+                
+                app.innerHTML = `
+                    <div>
+                        <div>
+                            <button id="back-btn">← Back to Albums</button>
+                        </div>
+                        <h2>${album.name}</h2>
+                        <p>Photo ${state.currentPhoto} of ${album.photos.length}</p>
+                        <div>
+                            <img 
+                                id="photo-img"
+                                src="${IMAGE_CDN_URL}/albums/${state.currentAlbum}/${currentPhotoFilename}"
+                                alt="Photo ${state.currentPhoto}"
+                                style="cursor: ${isLastPhoto ? 'default' : 'pointer'}"
+                            />
+                        </div>
+                        ${isLastPhoto ? '<p>End of album</p>' : ''}
+                    </div>
+                `;
+                
+                document.getElementById('back-btn').onclick = backToIndex;
+                
+                if (!isLastPhoto) {
+                    document.getElementById('photo-img').onclick = nextPhoto;
+                }
+            }
+        }
+
+        function openAlbum(albumId) {
+            state.currentAlbum = albumId;
+            state.currentPhoto = 1;
+            state.view = 'viewer';
+            render();
+        }
+
+        function nextPhoto() {
+            const album = state.albums[state.currentAlbum];
+            if (state.currentPhoto < album.photos.length) {
+                state.currentPhoto++;
+                render();
+            }
+        }
+
+        function backToIndex() {
+            state.view = 'index';
+            state.currentAlbum = null;
+            state.currentPhoto = 1;
+            render();
+        }
+
+        // Initial load
+        loadAlbums();
+    </script>
+</body>
+</html>
