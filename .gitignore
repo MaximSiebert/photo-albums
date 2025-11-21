@@ -1,0 +1,12 @@
+# Ignore all image files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.bmp
+*.svg
+*.tiff
+
+# But keep the JSON files
+!*.json
