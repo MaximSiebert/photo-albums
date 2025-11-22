@@ -5,8 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photo Albums</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    keyframes: {
+                        'fade-in': {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fade-in 0.3s ease-in'
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
+<body class="bg-stone-100">
     <div id="app"></div>
 
     <script>
@@ -14,13 +31,41 @@
         const IMAGE_CDN_URL = 'https://pub-56fc011d92464c39a31d846e70190c70.r2.dev';
         
 
-        
+
         let state = {
             view: 'index',
             currentAlbum: null,
             currentPhoto: 1,
             albums: {}
         };
+
+        // Parse URL hash to restore state
+        function parseHash() {
+            const hash = window.location.hash.slice(1); // Remove the #
+            if (!hash) return;
+
+            const parts = hash.split('/');
+            if (parts.length === 2) {
+                const [encodedAlbumId, photoNum] = parts;
+                const albumId = decodeURIComponent(encodedAlbumId);
+                const photoNumber = parseInt(photoNum, 10);
+
+                if (state.albums[albumId] && photoNumber > 0) {
+                    state.currentAlbum = albumId;
+                    state.currentPhoto = Math.min(photoNumber, state.albums[albumId].photos.length);
+                    state.view = 'viewer';
+                }
+            }
+        }
+
+        // Update URL hash when state changes
+        function updateHash() {
+            if (state.view === 'viewer' && state.currentAlbum) {
+                window.location.hash = `${encodeURIComponent(state.currentAlbum)}/${state.currentPhoto}`;
+            } else {
+                window.location.hash = '';
+            }
+        }
 
         // Load albums from folders
         async function loadAlbums() {
@@ -43,7 +88,8 @@
                         console.error(`Failed to load album ${albumId}:`, e);
                     }
                 }
-                
+
+                parseHash(); // Check URL hash after loading albums
                 render();
             } catch (e) {
                 console.error('Failed to load albums:', e);
@@ -57,8 +103,7 @@
             if (state.view === 'index') {
                 app.innerHTML = `
                     <div>
-                        <h1>Photo Albums</h1>
-                        <ul id="album-list"></ul>
+                        <ul id="album-list" class="grid grid-cols-6 p-4 text-xs items-end"></ul>
                     </div>
                 `;
                 
@@ -71,12 +116,14 @@
                 
                 Object.entries(state.albums).forEach(([id, album]) => {
                     const li = document.createElement('li');
+                    li.className = 'p-4 group';
                     const a = document.createElement('a');
                     a.href = '#';
                     
                     // Add cover image if available
                     if (album.photos && album.photos.length > 0) {
                         const img = document.createElement('img');
+                        img.className = 'mb-2 group-hover:border group-hover:border-black border border-transparent animate-fade-in';
                         img.src = `${IMAGE_CDN_URL}/albums/${id}/${album.photos[0]}`;
                         img.alt = album.name;
                         a.appendChild(img);
@@ -84,22 +131,24 @@
                     
                     const title = document.createElement('div');
                     title.textContent = album.name;
+                    title.className = 'group-hover:underline';
                     a.appendChild(title);
                     
-                    const count = document.createElement('div');
-                    count.textContent = `${album.photos.length} photos`;
-                    a.appendChild(count);
                     
                     if (album.created) {
                         const date = document.createElement('div');
                         const dateObj = new Date(album.created);
                         date.textContent = dateObj.toLocaleDateString('en-US', { 
                             year: 'numeric', 
-                            month: 'long', 
+                            month: 'short', 
                             day: 'numeric' 
                         });
                         a.appendChild(date);
                     }
+
+                    const count = document.createElement('div');
+                    count.textContent = `(${album.photos.length})`;
+                    a.appendChild(count);
                     
                     a.onclick = (e) => {
                         e.preventDefault();
@@ -112,29 +161,32 @@
                 const album = state.albums[state.currentAlbum];
                 const currentPhotoFilename = album.photos[state.currentPhoto - 1];
                 const isLastPhoto = state.currentPhoto >= album.photos.length;
-                
+
                 app.innerHTML = `
                     <div>
-                        <div>
-                            <button id="back-btn">← Back to Albums</button>
+                        <div class="absolute">
+                            <button id="back-btn">←</button>
                         </div>
-                        <h2>${album.name}</h2>
-                        <p>Photo ${state.currentPhoto} of ${album.photos.length}</p>
-                        <div>
-                            <img 
+                        <!-- <h2>${album.name}</h2>
+                        <p>Photo ${state.currentPhoto} of ${album.photos.length}</p> -->
+                        <div class="w-full h-dvh justify-items-center items-center grid">
+                            <img
+                                class="max-h-dvh p-24 animate-fade-in"
                                 id="photo-img"
                                 src="${IMAGE_CDN_URL}/albums/${state.currentAlbum}/${currentPhotoFilename}"
                                 alt="Photo ${state.currentPhoto}"
-                                style="cursor: ${isLastPhoto ? 'default' : 'pointer'}"
+                                style="cursor: pointer"
                             />
                         </div>
-                        ${isLastPhoto ? '<p>End of album</p>' : ''}
+                        <!-- ${isLastPhoto ? '<p>End of album - click photo to return</p>' : ''} -->
                     </div>
                 `;
-                
+
                 document.getElementById('back-btn').onclick = backToIndex;
-                
-                if (!isLastPhoto) {
+
+                if (isLastPhoto) {
+                    document.getElementById('photo-img').onclick = backToIndex;
+                } else {
                     document.getElementById('photo-img').onclick = nextPhoto;
                 }
             }
@@ -144,6 +196,7 @@
             state.currentAlbum = albumId;
             state.currentPhoto = 1;
             state.view = 'viewer';
+            updateHash();
             render();
         }
 
@@ -151,6 +204,7 @@
             const album = state.albums[state.currentAlbum];
             if (state.currentPhoto < album.photos.length) {
                 state.currentPhoto++;
+                updateHash();
                 render();
             }
         }
@@ -159,8 +213,15 @@
             state.view = 'index';
             state.currentAlbum = null;
             state.currentPhoto = 1;
+            updateHash();
             render();
         }
+
+        // Handle browser back/forward buttons
+        window.addEventListener('hashchange', () => {
+            parseHash();
+            render();
+        });
 
         // Initial load
         loadAlbums();

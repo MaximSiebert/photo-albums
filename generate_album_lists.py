@@ -10,6 +10,9 @@ image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
 # Get all album folders
 album_folders = [d for d in albums_dir.iterdir() if d.is_dir()]
 
+# Generate list of album IDs for albums.json
+album_ids = []
+
 for album_folder in album_folders:
     # Get all image files in the folder
     photos = sorted([
@@ -18,6 +21,8 @@ for album_folder in album_folders:
     ])
     
     if photos:
+        album_ids.append(album_folder.name)
+        
         photos_json_path = album_folder / 'photos.json'
         
         # Check if photos.json already exists to preserve created date
@@ -40,4 +45,14 @@ for album_folder in album_folders:
         
         print(f"Generated {album_folder.name}/photos.json with {len(photos)} photos")
 
-print("Done! Run this script whenever you add new photos.")
+# Create/update albums.json
+albums_json_path = albums_dir / 'albums.json'
+albums_data = {
+    'albums': sorted(album_ids)
+}
+
+with open(albums_json_path, 'w') as f:
+    json.dump(albums_data, f, indent=2)
+
+print(f"\nGenerated albums.json with {len(album_ids)} albums")
+print("Done! Albums automatically detected from folders.")

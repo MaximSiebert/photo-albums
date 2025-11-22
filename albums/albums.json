@@ -1,3 +1,7 @@
 {
-  "albums": ["test"]
+  "albums": [
+    "Long Album Name",
+    "test",
+    "test2"
+  ]
 }
