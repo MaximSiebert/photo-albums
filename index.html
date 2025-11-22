@@ -103,7 +103,7 @@
             if (state.view === 'index') {
                 app.innerHTML = `
                     <div>
-                        <ul id="album-list" class="grid grid-cols-6 p-4 text-xs items-end"></ul>
+                        <ul id="album-list" class="grid md:grid-cols-6 sm:grid-cols-3 grid-cols-2 p-4 text-xs items-end"></ul>
                     </div>
                 `;
                 
@@ -171,7 +171,7 @@
                         <p>Photo ${state.currentPhoto} of ${album.photos.length}</p> -->
                         <div class="w-full h-dvh justify-items-center items-center grid">
                             <img
-                                class="max-h-dvh p-24 animate-fade-in"
+                                class="max-h-dvh sm:p-24 p-12 animate-fade-in"
                                 id="photo-img"
                                 src="${IMAGE_CDN_URL}/albums/${state.currentAlbum}/${currentPhotoFilename}"
                                 alt="Photo ${state.currentPhoto}"
