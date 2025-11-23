@@ -27,10 +27,56 @@
     <div id="app"></div>
 
     <script>
-        // Configuration - set your Cloudflare R2 public URL here
-        const IMAGE_CDN_URL = 'https://pub-56fc011d92464c39a31d846e70190c70.r2.dev';
-        
+        // Configuration - ImageKit endpoint
+        const IMAGE_CDN_URL = 'https://ik.imagekit.io/splitfocus/albums';
 
+        // Helper function for ImageKit transformations
+        function getImageUrl(path, options = {}) {
+            const {
+                width = null,
+                height = null,
+                quality = 85,
+                format = 'auto',
+            } = options;
+
+            const transformations = [];
+            if (width) transformations.push(`w-${width}`);
+            if (height) transformations.push(`h-${height}`);
+            transformations.push(`q-${quality}`);
+            transformations.push(`f-${format}`);
+
+            const tr = transformations.join(',');
+            return `${IMAGE_CDN_URL}/tr:${tr}${path}`;
+        }
+
+        // Helper function to generate srcset for responsive images
+        function generateSrcset(path, sizes, quality = 85) {
+            return sizes.map(width =>
+                `${getImageUrl(path, { width, quality, format: 'auto' })} ${width}w`
+            ).join(', ');
+        }
+
+        // Preload next image for faster navigation
+        function preloadNextImage() {
+            const album = state.albums[state.currentAlbum];
+            if (!album || state.currentPhoto >= album.photos.length) return;
+
+            const nextPhotoFilename = album.photos[state.currentPhoto]; // +1 since array is 0-indexed
+            if (!nextPhotoFilename) return;
+
+            const nextPhotoPath = `/albums/${state.currentAlbum}/${nextPhotoFilename}`;
+
+            // Create link element for preloading
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.as = 'image';
+            link.href = getImageUrl(nextPhotoPath, { width: 1920, quality: 100, format: 'auto' });
+
+            // Also preload srcset sizes
+            link.imageSrcset = generateSrcset(nextPhotoPath, [800, 1200, 1920, 2560, 3840], 90);
+
+            document.head.appendChild(link);
+        }
 
         let state = {
             view: 'index',
@@ -123,9 +169,27 @@
                     // Add cover image if available
                     if (album.photos && album.photos.length > 0) {
                         const img = document.createElement('img');
-                        img.className = 'mb-2 group-hover:border group-hover:border-black border border-transparent animate-fade-in';
-                        img.src = `${IMAGE_CDN_URL}/albums/${id}/${album.photos[0]}`;
+                        img.className = 'mb-2 group-hover:border group-hover:border-black border border-transparent opacity-0';
+
+                        // Responsive srcset for thumbnails
+                        img.srcset = generateSrcset(`/albums/${id}/${album.photos[0]}`, [200, 400, 600, 800], 80);
+                        img.sizes = '(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw';
+
+                        // Fallback src
+                        img.src = getImageUrl(`/albums/${id}/${album.photos[0]}`, {
+                            width: 400,
+                            quality: 80,
+                            format: 'auto'
+                        });
                         img.alt = album.name;
+                        img.decoding = 'async';
+
+                        // Add fade-in animation after image loads
+                        img.onload = () => {
+                            img.classList.remove('opacity-0');
+                            img.classList.add('animate-fade-in');
+                        };
+
                         a.appendChild(img);
                     }
                     
@@ -162,20 +226,26 @@
                 const currentPhotoFilename = album.photos[state.currentPhoto - 1];
                 const isLastPhoto = state.currentPhoto >= album.photos.length;
 
+                const photoPath = `/albums/${state.currentAlbum}/${currentPhotoFilename}`;
+
                 app.innerHTML = `
                     <div>
-                        <div class="absolute">
+                        <div class="absolute bottom-0 w-full flex place-content-between text-xs px-6 py-4">
                             <button id="back-btn">←</button>
+                            <h2>${album.name}</h2>
+                            <p>(${state.currentPhoto}/${album.photos.length})</p>
                         </div>
-                        <!-- <h2>${album.name}</h2>
-                        <p>Photo ${state.currentPhoto} of ${album.photos.length}</p> -->
                         <div class="w-full h-dvh justify-items-center items-center grid">
                             <img
-                                class="max-h-dvh sm:p-24 p-12 animate-fade-in"
+                                class="max-h-dvh md:p-24 sm:p-12 p-6 opacity-0"
                                 id="photo-img"
-                                src="${IMAGE_CDN_URL}/albums/${state.currentAlbum}/${currentPhotoFilename}"
+                                srcset="${generateSrcset(photoPath, [800, 1200, 1920, 2560, 3840], 90)}"
+                                sizes="100vw"
+                                src="${getImageUrl(photoPath, { width: 1920, quality: 100, format: 'auto' })}"
                                 alt="Photo ${state.currentPhoto}"
                                 style="cursor: pointer"
+                                loading="eager"
+                                decoding="async"
                             />
                         </div>
                         <!-- ${isLastPhoto ? '<p>End of album - click photo to return</p>' : ''} -->
@@ -184,11 +254,22 @@
 
                 document.getElementById('back-btn').onclick = backToIndex;
 
+                const photoImg = document.getElementById('photo-img');
+
+                // Add fade-in animation after image loads
+                photoImg.onload = () => {
+                    photoImg.classList.remove('opacity-0');
+                    photoImg.classList.add('animate-fade-in');
+                };
+
                 if (isLastPhoto) {
-                    document.getElementById('photo-img').onclick = backToIndex;
+                    photoImg.onclick = backToIndex;
                 } else {
-                    document.getElementById('photo-img').onclick = nextPhoto;
+                    photoImg.onclick = nextPhoto;
                 }
+
+                // Preload the next image for instant navigation
+                preloadNextImage();
             }
         }
 
