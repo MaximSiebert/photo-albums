@@ -1,11 +1,31 @@
 {
   "name": "Test2",
   "photos": [
-    "DSCF1472.jpg",
-    "DSCF1502.jpg",
-    "DSCF1525.jpg",
-    "DSCF1586.jpg",
-    "DSCF1608.jpg"
+    {
+      "filename": "DSCF1472.jpg",
+      "width": 6240,
+      "height": 4160
+    },
+    {
+      "filename": "DSCF1502.jpg",
+      "width": 6240,
+      "height": 4160
+    },
+    {
+      "filename": "DSCF1525.jpg",
+      "width": 6240,
+      "height": 4160
+    },
+    {
+      "filename": "DSCF1586.jpg",
+      "width": 6240,
+      "height": 4160
+    },
+    {
+      "filename": "DSCF1608.jpg",
+      "width": 6240,
+      "height": 4160
+    }
   ],
   "created": "2025-11-22T14:54:26.744723"
 }

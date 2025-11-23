@@ -62,9 +62,10 @@
             const album = state.albums[state.currentAlbum];
             if (!album || state.currentPhoto >= album.photos.length) return;
 
-            const nextPhotoFilename = album.photos[state.currentPhoto]; // +1 since array is 0-indexed
-            if (!nextPhotoFilename) return;
+            const nextPhoto = album.photos[state.currentPhoto]; // +1 since array is 0-indexed
+            if (!nextPhoto) return;
 
+            const nextPhotoFilename = typeof nextPhoto === 'string' ? nextPhoto : nextPhoto.filename;
             const nextPhotoPath = `/albums/${state.currentAlbum}/${nextPhotoFilename}`;
 
             // Create link element for preloading
@@ -81,7 +82,8 @@
             view: 'index',
             currentAlbum: null,
             currentPhoto: 1,
-            albums: {}
+            albums: {},
+            sortBy: 'name' // 'name', 'date', 'count'
         };
 
         // Parse URL hash to restore state
@@ -154,18 +156,55 @@
             if (state.view === 'index') {
                 app.innerHTML = `
                     <div>
-                        <ul id="album-list" class="gap-x-8 gap-y-10 grid md:grid-cols-6 sm:grid-cols-3 grid-cols-2 md:px-6 sm:px-4 px-3 py-12 items-end"></ul>
+                        <div class="flex gap-2 px-6 pt-6 pb-2 text-xs">
+                            <button id="sort-name" class="${state.sortBy === 'name' ? 'underline' : ''}">Name</button>
+                            <button id="sort-date" class="${state.sortBy === 'date' ? 'underline' : ''}">Date</button>
+                            <button id="sort-count" class="${state.sortBy === 'count' ? 'underline' : ''}">Count</button>
+                        </div>
+                        <ul id="album-list" class="gap-x-8 gap-y-10 grid md:grid-cols-6 sm:grid-cols-3 grid-cols-2 md:px-6 sm:px-4 px-3 pb-12 items-end"></ul>
                     </div>
                 `;
-                
+
                 const list = document.getElementById('album-list');
-                
+
                 if (Object.keys(state.albums).length === 0) {
                     list.innerHTML = '<li>No albums found</li>';
                     return;
                 }
-                
-                Object.entries(state.albums).forEach(([id, album]) => {
+
+                // Add sorting button handlers
+                document.getElementById('sort-name').onclick = () => {
+                    state.sortBy = 'name';
+                    render();
+                };
+                document.getElementById('sort-date').onclick = () => {
+                    state.sortBy = 'date';
+                    render();
+                };
+                document.getElementById('sort-count').onclick = () => {
+                    state.sortBy = 'count';
+                    render();
+                };
+
+                // Sort albums based on current sort option
+                const albumEntries = Object.entries(state.albums);
+                albumEntries.sort((a, b) => {
+                    const [idA, albumA] = a;
+                    const [idB, albumB] = b;
+
+                    if (state.sortBy === 'name') {
+                        return albumA.name.localeCompare(albumB.name);
+                    } else if (state.sortBy === 'date') {
+                        const dateA = albumA.created ? new Date(albumA.created) : new Date(0);
+                        const dateB = albumB.created ? new Date(albumB.created) : new Date(0);
+                        return dateB - dateA; // Newest first
+                    } else if (state.sortBy === 'count') {
+                        return albumB.photos.length - albumA.photos.length; // Most photos first
+                    }
+                    return 0;
+                });
+
+                albumEntries.forEach(([id, album]) => {
                     const li = document.createElement('li');
                     li.className = 'md:p-6 sm:p-4 p-3 group';
                     const a = document.createElement('a');
@@ -174,14 +213,15 @@
                     // Add cover image if available
                     if (album.photos && album.photos.length > 0) {
                         const img = document.createElement('img');
-                        img.className = 'mb-4 group-hover:border group-hover:border-stone-800 border border-transparent opacity-0';
+                        img.className = 'mb-4 group-hover:border group-hover:border-stone-800 dark:group-hover:border-stone-100 border border-transparent opacity-0';
 
-                        // Responsive srcset for thumbnails
-                        img.srcset = generateSrcset(`/albums/${id}/${album.photos[0]}`, [200, 400, 600, 800], 80);
-                        img.sizes = '(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw';
+                        // Get first photo (support both string and object format)
+                        const firstPhoto = typeof album.photos[0] === 'string' ? album.photos[0] : album.photos[0].filename;
 
-                        // Fallback src
-                        img.src = getImageUrl(`/albums/${id}/${album.photos[0]}`, {
+                        // Store data for lazy loading
+                        img.dataset.srcset = generateSrcset(`/albums/${id}/${firstPhoto}`, [200, 400, 600, 800], 80);
+                        img.dataset.sizes = '(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw';
+                        img.dataset.src = getImageUrl(`/albums/${id}/${firstPhoto}`, {
                             width: 400,
                             quality: 80,
                             format: 'auto'
@@ -216,7 +256,7 @@
                     // }
 
                     const count = document.createElement('div');
-                    count.className = 'text-stone-500'
+                    count.className = 'text-stone-500 opacity-0 group-hover:opacity-100'
                     count.textContent = `(${album.photos.length})`;
                     a.appendChild(count);
                     
@@ -229,7 +269,8 @@
                     a.onmouseenter = () => {
                         if (album.photos && album.photos.length > 0) {
                             const photosToPreload = album.photos.slice(0, 3);
-                            photosToPreload.forEach(photoFilename => {
+                            photosToPreload.forEach(photo => {
+                                const photoFilename = typeof photo === 'string' ? photo : photo.filename;
                                 const link = document.createElement('link');
                                 link.rel = 'prefetch';
                                 link.as = 'image';
@@ -243,9 +284,29 @@
                     li.appendChild(a);
                     list.appendChild(li);
                 });
+
+                // Lazy load images with Intersection Observer
+                const imageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.srcset = img.dataset.srcset;
+                            img.sizes = img.dataset.sizes;
+                            img.src = img.dataset.src;
+                            observer.unobserve(img);
+                        }
+                    });
+                }, {
+                    rootMargin: '50px'
+                });
+
+                document.querySelectorAll('#album-list img').forEach(img => {
+                    imageObserver.observe(img);
+                });
             } else {
                 const album = state.albums[state.currentAlbum];
-                const currentPhotoFilename = album.photos[state.currentPhoto - 1];
+                const currentPhoto = album.photos[state.currentPhoto - 1];
+                const currentPhotoFilename = typeof currentPhoto === 'string' ? currentPhoto : currentPhoto.filename;
                 const isLastPhoto = state.currentPhoto >= album.photos.length;
 
                 const photoPath = `/albums/${state.currentAlbum}/${currentPhotoFilename}`;
@@ -397,6 +458,62 @@
             } else if (e.key === 'Escape') {
                 e.preventDefault();
                 backToIndex();
+            }
+        });
+
+        // Handle touch/swipe gestures
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        window.addEventListener('touchstart', (e) => {
+            if (state.view !== 'viewer') return;
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        });
+
+        window.addEventListener('touchend', (e) => {
+            if (state.view !== 'viewer') return;
+
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+
+            const album = state.albums[state.currentAlbum];
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+
+            // Minimum swipe distance to trigger action (50px)
+            const minSwipeDistance = 50;
+
+            // Determine if horizontal or vertical swipe
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Horizontal swipe
+                if (Math.abs(deltaX) > minSwipeDistance) {
+                    if (deltaX > 0) {
+                        // Swipe right (previous photo or back to index)
+                        if (state.currentPhoto === 1) {
+                            backToIndex();
+                        } else {
+                            state.currentPhoto--;
+                            updateHash();
+                            render();
+                        }
+                    } else {
+                        // Swipe left (next photo or back to index)
+                        if (state.currentPhoto >= album.photos.length) {
+                            backToIndex();
+                        } else {
+                            nextPhoto();
+                        }
+                    }
+                }
+            } else {
+                // Vertical swipe
+                if (deltaY > minSwipeDistance) {
+                    // Swipe down - back to index
+                    backToIndex();
+                }
             }
         });
 
