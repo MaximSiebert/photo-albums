@@ -1,10 +1,26 @@
 {
   "name": "Test",
   "photos": [
-    "DSCF1366.jpg",
-    "DSCF1370.jpg",
-    "DSCF1418.jpg",
-    "DSCF1460.jpg"
+    {
+      "filename": "DSCF1366.jpg",
+      "width": 3116,
+      "height": 3895
+    },
+    {
+      "filename": "DSCF1370.jpg",
+      "width": 2774,
+      "height": 3467
+    },
+    {
+      "filename": "DSCF1418.jpg",
+      "width": 2774,
+      "height": 3467
+    },
+    {
+      "filename": "DSCF1460.jpg",
+      "width": 3854,
+      "height": 4817
+    }
   ],
   "created": "2025-11-21T13:45:40.825655"
 }

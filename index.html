@@ -124,13 +124,13 @@
         async function loadAlbums() {
             try {
                 // Fetch the albums list
-                const response = await fetch('./albums/albums.json');
+                const response = await fetch('./albums/albums.json', { cache: 'no-store' });
                 const albumsList = await response.json();
-                
+
                 // Load each album's photos
                 for (const albumId of albumsList.albums) {
                     try {
-                        const photosResponse = await fetch(`./albums/${albumId}/photos.json`);
+                        const photosResponse = await fetch(`./albums/${albumId}/photos.json`, { cache: 'no-store' });
                         const photosData = await photosResponse.json();
                         state.albums[albumId] = {
                             name: photosData.name || albumId,
@@ -156,8 +156,11 @@
             if (state.view === 'index') {
                 app.innerHTML = `
                     <div>
-                        <div class="p-6 grid sm:gap-x-16 gap-x-6 md:grid-cols-6 sm:grid-cols-3 grid-cols-2 border-b border-stone-800">
-                          <h1>Albums</h1>
+                        <div class="p-6 grid sm:gap-x-16 gap-x-6 md:grid-cols-6 sm:grid-cols-3 grid-cols-2 border-b border-stone-800 dark:border-stone-400">
+                          <div class="flex space-x-1 group h-fit">
+                            <h1><a href="/" class="hover:underline">Albums</a></h1>
+                            <span class="text-stone-500 sm:opacity-0 group-hover:opacity-100">(${Object.keys(state.albums).length})</span>
+                          </div>
                           <div class="space-y-1">
                             <span>Sort by:</span>
                             <div>
@@ -168,6 +171,9 @@
                           </div>
                         </div>
                         <ul id="album-list" class="p-6 sm:gap-x-16 gap-x-6 gap-y-10 grid md:grid-cols-6 sm:grid-cols-3 grid-cols-2 items-end"></ul>
+                        <div class="p-6 border-t border-stone-800 dark:border-stone-400">
+                          © Albums
+                        </div>
                     </div>
                 `;
 
@@ -218,16 +224,32 @@
                     
                     // Add cover image if available
                     if (album.photos && album.photos.length > 0) {
-                        const img = document.createElement('img');
-                        img.className = 'mb-4 group-hover:border group-hover:border-stone-800 dark:group-hover:border-stone-100 border border-transparent opacity-0';
-
                         // Get first photo (support both string and object format)
-                        const firstPhoto = typeof album.photos[0] === 'string' ? album.photos[0] : album.photos[0].filename;
+                        const firstPhoto = album.photos[0];
+                        const firstPhotoFilename = typeof firstPhoto === 'string' ? firstPhoto : firstPhoto.filename;
+
+                        // Get dimensions if available
+                        const coverWidth = (typeof firstPhoto === 'object' && firstPhoto.width) ? firstPhoto.width : null;
+                        const coverHeight = (typeof firstPhoto === 'object' && firstPhoto.height) ? firstPhoto.height : null;
+                        const coverAspectRatio = (coverWidth && coverHeight) ? `${coverWidth} / ${coverHeight}` : 'auto';
+
+                        // Create container with aspect ratio
+                        const imgContainer = document.createElement('div');
+                        imgContainer.className = 'relative mb-4';
+                        imgContainer.style.aspectRatio = coverAspectRatio;
+
+                        // Add background placeholder
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'absolute inset-0 bg-stone-300 dark:bg-stone-700 group-hover:border group-hover:border-stone-800 dark:group-hover:border-stone-100 border border-transparent';
+                        imgContainer.appendChild(placeholder);
+
+                        const img = document.createElement('img');
+                        img.className = 'relative z-10 w-full h-full object-contain group-hover:border group-hover:border-stone-800 dark:group-hover:border-stone-100 border border-transparent opacity-0';
 
                         // Store data for lazy loading
-                        img.dataset.srcset = generateSrcset(`/albums/${id}/${firstPhoto}`, [200, 400, 600, 800], 80);
+                        img.dataset.srcset = generateSrcset(`/albums/${id}/${firstPhotoFilename}`, [200, 400, 600, 800], 80);
                         img.dataset.sizes = '(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw';
-                        img.dataset.src = getImageUrl(`/albums/${id}/${firstPhoto}`, {
+                        img.dataset.src = getImageUrl(`/albums/${id}/${firstPhotoFilename}`, {
                             width: 400,
                             quality: 80,
                             format: 'auto'
@@ -241,30 +263,36 @@
                             img.classList.add('animate-fade-in');
                         };
 
-                        a.appendChild(img);
+                        imgContainer.appendChild(img);
+                        a.appendChild(imgContainer);
                     }
                     
+                    const infoWrapper = document.createElement('div');
+                    infoWrapper.className = 'flex space-x-1'
+
                     const title = document.createElement('div');
                     title.textContent = album.name;
                     title.className = 'group-hover:underline';
-                    a.appendChild(title);
-                    
-                    
+                    infoWrapper.appendChild(title);
+
+
                     // if (album.created) {
                     //     const date = document.createElement('div');
                     //     const dateObj = new Date(album.created);
-                    //     date.textContent = dateObj.toLocaleDateString('en-US', { 
-                    //         year: 'numeric', 
-                    //         month: 'short', 
-                    //         day: 'numeric' 
+                    //     date.textContent = dateObj.toLocaleDateString('en-US', {
+                    //         year: 'numeric',
+                    //         month: 'short',
+                    //         day: 'numeric'
                     //     });
-                    //     a.appendChild(date);
+                    //     infoWrapper.appendChild(date);
                     // }
 
                     const count = document.createElement('div');
-                    count.className = 'text-stone-500 opacity-0 group-hover:opacity-100'
+                    count.className = 'text-stone-500 sm:opacity-0 group-hover:opacity-100'
                     count.textContent = `(${album.photos.length})`;
-                    a.appendChild(count);
+                    infoWrapper.appendChild(count);
+
+                    a.appendChild(infoWrapper);
                     
                     a.onclick = (e) => {
                         e.preventDefault();
@@ -315,6 +343,13 @@
                 const currentPhotoFilename = typeof currentPhoto === 'string' ? currentPhoto : currentPhoto.filename;
                 const isLastPhoto = state.currentPhoto >= album.photos.length;
 
+                // Get dimensions if available
+                const photoWidth = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.width) ? currentPhoto.width : null;
+                const photoHeight = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.height) ? currentPhoto.height : null;
+                const aspectRatio = (photoWidth && photoHeight) ? `${photoWidth} / ${photoHeight}` : 'auto';
+
+                console.log('Photo dimensions:', { currentPhoto, photoWidth, photoHeight, aspectRatio });
+
                 const photoPath = `/albums/${state.currentAlbum}/${currentPhotoFilename}`;
 
                 app.innerHTML = `
@@ -325,34 +360,32 @@
                         </div>
 
                         <div class="absolute bottom-0 w-full flex place-content-between px-6 py-4">
-                            <div class="flex">
-                              <button id="back-btn" class="mr-2">
-                                <svg viewBox="-0.5 -0.5 9 9" xmlns="http://www.w3.org/2000/svg" id="Arrow-Left--Streamline-Ultimate" height="9" width="9">
-                                  <desc>
-                                    Arrow Left Streamline Icon: https://streamlinehq.com
-                                  </desc>
-                                  <path d="m0.2523333333333333 4 7.495333333333333 0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path>
-                                  <path d="M4.2476666666666665 0.3333333333333333 0.3666666666666667 3.7496666666666667a0.3333333333333333 0.3333333333333333 0 0 0 0 0.5L4.2476666666666665 7.666666666666666" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path>
-                                </svg>
+                            <div class="flex space-x-2">
+                              <button id="back-btn" class="mr-2 hover:underline">
+                                Albums
                               </button>
+                              /
                               <h2>${album.name}</h2>
                             </div>
                             <p>(${state.currentPhoto}/${album.photos.length})</p>
                         </div>
                         <div class="w-full h-dvh md:p-24 sm:p-12 p-6">
-                            <div class="w-full h-full flex items-center justify-center">
-                                <img
-                                    class="max-w-full max-h-full object-contain opacity-0"
-                                    id="photo-img"
-                                    srcset="${generateSrcset(photoPath, [800, 1200, 1920, 2560, 3840], 100)}"
-                                    sizes="100vw"
-                                    src="${getImageUrl(photoPath, { width: 1920, quality: 100, format: 'auto' })}"
-                                    alt="Photo ${state.currentPhoto}"
-                                    style="cursor: pointer"
-                                    loading="eager"
-                                    decoding="async"
-                                />
+                          <div class="w-full h-full flex items-center justify-center">
+                            <div class="relative" style="aspect-ratio: ${aspectRatio}; max-width: 100%; max-height: 100%;">
+                              <div class="absolute inset-0 bg-stone-300 dark:bg-stone-700"></div>
+                              <img
+                                  class="relative z-10 w-full h-full object-contain opacity-0"
+                                  id="photo-img"
+                                  srcset="${generateSrcset(photoPath, [800, 1200, 1920, 2560, 3840], 100)}"
+                                  sizes="100vw"
+                                  src="${getImageUrl(photoPath, { width: 1920, quality: 100, format: 'auto' })}"
+                                  alt="Photo ${state.currentPhoto}"
+                                  style="cursor: pointer"
+                                  loading="eager"
+                                  decoding="async"
+                              />
                             </div>
+                          </div>
                         </div>
                         <!-- ${isLastPhoto ? '<p>End of album - click photo to return</p>' : ''} -->
                     </div>

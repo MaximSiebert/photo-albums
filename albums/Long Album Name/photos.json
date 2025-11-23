@@ -1,7 +1,11 @@
 {
   "name": "Long Album Name",
   "photos": [
-    "DSCF3328.jpg"
+    {
+      "filename": "DSCF3328.jpg",
+      "width": 2048,
+      "height": 1365
+    }
   ],
   "created": "2025-11-22T15:56:35.437886"
 }
