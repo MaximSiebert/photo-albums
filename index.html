@@ -86,7 +86,13 @@
         // Parse URL hash to restore state
         function parseHash() {
             const hash = window.location.hash.slice(1); // Remove the #
-            if (!hash) return;
+            if (!hash) {
+                // No hash means we're at the index
+                state.view = 'index';
+                state.currentAlbum = null;
+                state.currentPhoto = 1;
+                return;
+            }
 
             const parts = hash.split('/');
             if (parts.length === 2) {
@@ -250,7 +256,15 @@
                         </div>
 
                         <div class="absolute bottom-0 w-full flex place-content-between text-xs px-6 py-4">
-                            <button id="back-btn">←</button>
+                            <button id="back-btn">
+                              <svg viewBox="-0.5 -0.5 12 12" xmlns="http://www.w3.org/2000/svg" id="Arrow-Left--Streamline-Ultimate" height="12" width="12">
+                                <desc>
+                                  Arrow Left Streamline Icon: https://streamlinehq.com
+                                </desc>
+                                <path d="m0.3469583333333333 5.5 10.306083333333333 0" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path>
+                                <path d="M5.840541666666667 0.4583333333333333 0.5041666666666667 5.1557916666666666a0.4583333333333333 0.4583333333333333 0 0 0 0 0.6875L5.840541666666667 10.541666666666666" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></path>
+                              </svg>  
+                            </button>
                             <h2>${album.name}</h2>
                             <p>(${state.currentPhoto}/${album.photos.length})</p>
                         </div>
