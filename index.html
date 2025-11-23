@@ -16,7 +16,7 @@
                         }
                     },
                     animation: {
-                        'fade-in': 'fade-in 0.3s ease-in'
+                        'fade-in': 'fade-in .6s ease-in'
                     }
                 }
             }
@@ -70,10 +70,8 @@
             const link = document.createElement('link');
             link.rel = 'prefetch';
             link.as = 'image';
-            link.href = getImageUrl(nextPhotoPath, { width: 1920, quality: 100, format: 'auto' });
-
-            // Also preload srcset sizes
-            link.imageSrcset = generateSrcset(nextPhotoPath, [800, 1200, 1920, 2560, 3840], 90);
+            link.imageSrcset = generateSrcset(nextPhotoPath, [800, 1200, 1920, 2560, 3840], 100);
+            link.imageSizes = '100vw';
 
             document.head.appendChild(link);
         }
@@ -199,16 +197,16 @@
                     a.appendChild(title);
                     
                     
-                    if (album.created) {
-                        const date = document.createElement('div');
-                        const dateObj = new Date(album.created);
-                        date.textContent = dateObj.toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric' 
-                        });
-                        a.appendChild(date);
-                    }
+                    // if (album.created) {
+                    //     const date = document.createElement('div');
+                    //     const dateObj = new Date(album.created);
+                    //     date.textContent = dateObj.toLocaleDateString('en-US', { 
+                    //         year: 'numeric', 
+                    //         month: 'short', 
+                    //         day: 'numeric' 
+                    //     });
+                    //     a.appendChild(date);
+                    // }
 
                     const count = document.createElement('div');
                     count.textContent = `(${album.photos.length})`;
@@ -218,6 +216,22 @@
                         e.preventDefault();
                         openAlbum(id);
                     };
+
+                    // Preload first 3 images on hover
+                    a.onmouseenter = () => {
+                        if (album.photos && album.photos.length > 0) {
+                            const photosToPreload = album.photos.slice(0, 3);
+                            photosToPreload.forEach(photoFilename => {
+                                const link = document.createElement('link');
+                                link.rel = 'prefetch';
+                                link.as = 'image';
+                                link.imageSrcset = generateSrcset(`/albums/${id}/${photoFilename}`, [800, 1200, 1920, 2560, 3840], 100);
+                                link.imageSizes = '100vw';
+                                document.head.appendChild(link);
+                            });
+                        }
+                    };
+
                     li.appendChild(a);
                     list.appendChild(li);
                 });
@@ -230,6 +244,11 @@
 
                 app.innerHTML = `
                     <div>
+                        <!-- Loading progress bar -->
+                        <div class="fixed top-0 left-0 w-full h-[2px] z-50">
+                            <div id="loading-bar" class="h-full bg-stone-200 transition-all duration-150" style="width: 0%"></div>
+                        </div>
+
                         <div class="absolute bottom-0 w-full flex place-content-between text-xs px-6 py-4">
                             <button id="back-btn">←</button>
                             <h2>${album.name}</h2>
@@ -239,7 +258,7 @@
                             <img
                                 class="max-h-dvh md:p-24 sm:p-12 p-6 opacity-0"
                                 id="photo-img"
-                                srcset="${generateSrcset(photoPath, [800, 1200, 1920, 2560, 3840], 90)}"
+                                srcset="${generateSrcset(photoPath, [800, 1200, 1920, 2560, 3840], 100)}"
                                 sizes="100vw"
                                 src="${getImageUrl(photoPath, { width: 1920, quality: 100, format: 'auto' })}"
                                 alt="Photo ${state.currentPhoto}"
@@ -255,11 +274,40 @@
                 document.getElementById('back-btn').onclick = backToIndex;
 
                 const photoImg = document.getElementById('photo-img');
+                const loadingBar = document.getElementById('loading-bar');
 
-                // Add fade-in animation after image loads
+                // Optimized: let browser load natively, simulate smooth progress
+                let progress = 0;
+                let progressSpeed = 15; // Start fast
+
+                const progressInterval = setInterval(() => {
+                    // Slow down as we get closer to 90%
+                    if (progress > 70) progressSpeed = 3;
+                    else if (progress > 50) progressSpeed = 8;
+
+                    progress += progressSpeed;
+                    if (progress > 90) progress = 90;
+                    loadingBar.style.width = `${progress}%`;
+                }, 50);
+
+                // Complete on actual image load
                 photoImg.onload = () => {
+                    clearInterval(progressInterval);
+                    loadingBar.style.width = '100%';
+
+                    setTimeout(() => {
+                        loadingBar.style.opacity = '0';
+                    }, 150);
+
                     photoImg.classList.remove('opacity-0');
                     photoImg.classList.add('animate-fade-in');
+                };
+
+                photoImg.onerror = () => {
+                    clearInterval(progressInterval);
+                    loadingBar.style.width = '100%';
+                    loadingBar.classList.remove('bg-black');
+                    loadingBar.classList.add('bg-red-500');
                 };
 
                 if (isLastPhoto) {
