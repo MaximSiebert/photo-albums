@@ -510,8 +510,8 @@
                 }
             } else {
                 // Vertical swipe
-                if (deltaY > minSwipeDistance) {
-                    // Swipe down - back to index
+                if (deltaY < -minSwipeDistance) {
+                    // Swipe up - back to index
                     backToIndex();
                 }
             }
