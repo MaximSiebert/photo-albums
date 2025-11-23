@@ -83,7 +83,7 @@
             currentAlbum: null,
             currentPhoto: 1,
             albums: {},
-            sortBy: 'name' // 'name', 'date', 'count'
+            sortBy: 'date' // 'name', 'date', 'count'
         };
 
         // Parse URL hash to restore state
@@ -156,12 +156,18 @@
             if (state.view === 'index') {
                 app.innerHTML = `
                     <div>
-                        <div class="flex gap-2 px-6 pt-6 pb-2 text-xs">
-                            <button id="sort-name" class="${state.sortBy === 'name' ? 'underline' : ''}">Name</button>
-                            <button id="sort-date" class="${state.sortBy === 'date' ? 'underline' : ''}">Date</button>
-                            <button id="sort-count" class="${state.sortBy === 'count' ? 'underline' : ''}">Count</button>
+                        <div class="p-6 grid gap-x-16 md:grid-cols-6 sm:grid-cols-3 grid-cols-2 border-b border-stone-800">
+                          <h1>Albums</h1>
+                          <div class="space-y-1">
+                            <span>Sort by:</span>
+                            <div>
+                                <button id="sort-date" class="block ${state.sortBy === 'date' ? 'underline' : ''}">Date</button>
+                                <button id="sort-name" class="block ${state.sortBy === 'name' ? 'underline' : ''}">Name</button>
+                                <button id="sort-count" class="block ${state.sortBy === 'count' ? 'underline' : ''}">Count</button>
+                            </div>
+                          </div>
                         </div>
-                        <ul id="album-list" class="gap-x-8 gap-y-10 grid md:grid-cols-6 sm:grid-cols-3 grid-cols-2 md:px-6 sm:px-4 px-3 pb-12 items-end"></ul>
+                        <ul id="album-list" class="p-6 gap-x-16 gap-y-10 grid md:grid-cols-6 sm:grid-cols-3 grid-cols-2 items-end"></ul>
                     </div>
                 `;
 
@@ -206,7 +212,7 @@
 
                 albumEntries.forEach(([id, album]) => {
                     const li = document.createElement('li');
-                    li.className = 'md:p-6 sm:p-4 p-3 group';
+                    li.className = 'group';
                     const a = document.createElement('a');
                     a.href = '#';
                     
@@ -455,6 +461,9 @@
                     updateHash();
                     render();
                 }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                backToIndex();
             } else if (e.key === 'Escape') {
                 e.preventDefault();
                 backToIndex();
