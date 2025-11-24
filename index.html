@@ -57,25 +57,31 @@
             ).join(', ');
         }
 
-        // Preload next image for faster navigation
+        // Preload next 5 images for faster navigation
         function preloadNextImage() {
             const album = state.albums[state.currentAlbum];
             if (!album || state.currentPhoto >= album.photos.length) return;
 
-            const nextPhoto = album.photos[state.currentPhoto]; // +1 since array is 0-indexed
-            if (!nextPhoto) return;
+            // Preload next 5 images (starting from next photo, not current)
+            for (let i = 1; i <= 5; i++) {
+                const photoIndex = state.currentPhoto + i - 1; // state.currentPhoto is 1-indexed, array is 0-indexed
+                if (photoIndex >= album.photos.length) break;
 
-            const nextPhotoFilename = typeof nextPhoto === 'string' ? nextPhoto : nextPhoto.filename;
-            const nextPhotoPath = `/albums/${state.currentAlbum}/${nextPhotoFilename}`;
+                const nextPhoto = album.photos[photoIndex];
+                if (!nextPhoto) continue;
 
-            // Create link element for preloading
-            const link = document.createElement('link');
-            link.rel = 'prefetch';
-            link.as = 'image';
-            link.imageSrcset = generateSrcset(nextPhotoPath, [800, 1200, 1920, 2560, 3840], 100);
-            link.imageSizes = '100vw';
+                const nextPhotoFilename = typeof nextPhoto === 'string' ? nextPhoto : nextPhoto.filename;
+                const nextPhotoPath = `/albums/${state.currentAlbum}/${nextPhotoFilename}`;
 
-            document.head.appendChild(link);
+                // Create link element for preloading
+                const link = document.createElement('link');
+                link.rel = 'preload';
+                link.as = 'image';
+                link.imageSrcset = generateSrcset(nextPhotoPath, [800, 1200, 1920], 85);
+                link.imageSizes = '100vw';
+
+                document.head.appendChild(link);
+            }
         }
 
         let state = {
