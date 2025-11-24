@@ -124,13 +124,13 @@
         async function loadAlbums() {
             try {
                 // Fetch the albums list
-                const response = await fetch('./albums/albums.json', { cache: 'no-store' });
+                const response = await fetch('./albums/albums.json');
                 const albumsList = await response.json();
 
                 // Load each album's photos
                 for (const albumId of albumsList.albums) {
                     try {
-                        const photosResponse = await fetch(`./albums/${albumId}/photos.json`, { cache: 'no-store' });
+                        const photosResponse = await fetch(`./albums/${albumId}/photos.json`);
                         const photosData = await photosResponse.json();
                         state.albums[albumId] = {
                             name: photosData.name || albumId,
@@ -347,6 +347,8 @@
                 const photoWidth = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.width) ? currentPhoto.width : null;
                 const photoHeight = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.height) ? currentPhoto.height : null;
                 const aspectRatio = (photoWidth && photoHeight) ? `${photoWidth} / ${photoHeight}` : 'auto';
+                const isPortrait = (photoWidth && photoHeight) ? photoHeight > photoWidth : false;
+                const orientationClass = isPortrait ? 'sm:h-full sm:w-auto w-full' : 'w-full';
 
                 console.log('Photo dimensions:', { currentPhoto, photoWidth, photoHeight, aspectRatio });
 
@@ -371,14 +373,14 @@
                         </div>
                         <div class="w-full h-dvh md:p-24 sm:p-12 p-6">
                           <div class="w-full h-full flex items-center justify-center relative">
-                            <div class="absolute inset-50" style="aspect-ratio: ${aspectRatio}; max-width: 100%; max-height: 100%;">
+                            <div class="absolute inset-50 ${orientationClass}" style="aspect-ratio: ${aspectRatio}; max-width: 100%; max-height: 100%;">
                               <div class="absolute inset-0 bg-stone-200 dark:bg-stone-800"></div>
                               <img
                                   class="relative z-10 w-full h-full object-contain opacity-0"
                                   id="photo-img"
-                                  srcset="${generateSrcset(photoPath, [800, 1200, 1920, 2560, 3840], 100)}"
+                                  srcset="${generateSrcset(photoPath, [800, 1200, 1920], 85)}"
                                   sizes="100vw"
-                                  src="${getImageUrl(photoPath, { width: 1920, quality: 100, format: 'auto' })}"
+                                  src="${getImageUrl(photoPath, { width: 1920, quality: 85, format: 'auto' })}"
                                   alt="Photo ${state.currentPhoto}"
                                   style="cursor: pointer"
                                   loading="eager"
