@@ -71,7 +71,7 @@
                 if (!nextPhoto) continue;
 
                 const nextPhotoFilename = typeof nextPhoto === 'string' ? nextPhoto : nextPhoto.filename;
-                const nextPhotoPath = `/albums/${state.currentAlbum}/${nextPhotoFilename}`;
+                const nextPhotoPath = `/albums/${encodeURIComponent(state.currentAlbum)}/${nextPhotoFilename}`;
 
                 // Create link element for preloading
                 const link = document.createElement('link');
@@ -136,7 +136,7 @@
                 // Load each album's photos
                 for (const albumId of albumsList.albums) {
                     try {
-                        const photosResponse = await fetch(`./albums/${albumId}/photos.json`);
+                        const photosResponse = await fetch(`./albums/${encodeURIComponent(albumId)}/photos.json`);
                         const photosData = await photosResponse.json();
                         state.albums[albumId] = {
                             name: photosData.name || albumId,
@@ -253,9 +253,9 @@
                         img.className = 'relative z-10 w-full h-full object-contain group-hover:outline group-hover:outline-stone-800 dark:group-hover:outline-stone-100 outline outline-transparent opacity-0';
 
                         // Store data for lazy loading
-                        img.dataset.srcset = generateSrcset(`/albums/${id}/${firstPhotoFilename}`, [200, 400, 600, 800], 80);
+                        img.dataset.srcset = generateSrcset(`/albums/${encodeURIComponent(id)}/${firstPhotoFilename}`, [200, 400, 600, 800], 80);
                         img.dataset.sizes = '(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw';
-                        img.dataset.src = getImageUrl(`/albums/${id}/${firstPhotoFilename}`, {
+                        img.dataset.src = getImageUrl(`/albums/${encodeURIComponent(id)}/${firstPhotoFilename}`, {
                             width: 400,
                             quality: 80,
                             format: 'auto'
@@ -314,7 +314,7 @@
                                 const link = document.createElement('link');
                                 link.rel = 'prefetch';
                                 link.as = 'image';
-                                link.imageSrcset = generateSrcset(`/albums/${id}/${photoFilename}`, [800, 1200, 1920, 2560, 3840], 100);
+                                link.imageSrcset = generateSrcset(`/albums/${encodeURIComponent(id)}/${photoFilename}`, [800, 1200, 1920, 2560, 3840], 100);
                                 link.imageSizes = '100vw';
                                 document.head.appendChild(link);
                             });
@@ -358,7 +358,7 @@
 
                 console.log('Photo dimensions:', { currentPhoto, photoWidth, photoHeight, aspectRatio });
 
-                const photoPath = `/albums/${state.currentAlbum}/${currentPhotoFilename}`;
+                const photoPath = `/albums/${encodeURIComponent(state.currentAlbum)}/${currentPhotoFilename}`;
 
                 app.innerHTML = `
                     <div>

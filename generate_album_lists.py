@@ -4,9 +4,27 @@ import json
 from pathlib import Path
 from datetime import datetime
 from PIL import Image
+from PIL.ExifTags import TAGS
 
 albums_dir = Path('albums')
 image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+
+def get_image_capture_date(image_path):
+    """Extract capture date from image EXIF data"""
+    try:
+        with Image.open(image_path) as img:
+            exif_data = img._getexif()
+            if exif_data:
+                for tag_id, value in exif_data.items():
+                    tag = TAGS.get(tag_id, tag_id)
+                    # Look for DateTimeOriginal (when photo was taken)
+                    if tag == 'DateTimeOriginal':
+                        # Convert EXIF date format (YYYY:MM:DD HH:MM:SS) to ISO format
+                        date_str = value.replace(':', '-', 2)  # Replace first two colons for date part
+                        return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').isoformat()
+    except Exception as e:
+        print(f"Warning: Could not read EXIF data from {image_path.name}: {e}")
+    return None
 
 # Get all album folders
 album_folders = [d for d in albums_dir.iterdir() if d.is_dir()]
@@ -26,13 +44,17 @@ for album_folder in album_folders:
 
         photos_json_path = album_folder / 'photos.json'
 
-        # Check if photos.json already exists to preserve created date
-        if photos_json_path.exists():
-            with open(photos_json_path, 'r') as f:
-                existing_data = json.load(f)
-                created_date = existing_data.get('created')
-        else:
-            created_date = datetime.now().isoformat()
+        # Try to get capture date from first image
+        created_date = get_image_capture_date(image_files[0])
+
+        # Fallback to existing created date if available, or current time
+        if not created_date:
+            if photos_json_path.exists():
+                with open(photos_json_path, 'r') as f:
+                    existing_data = json.load(f)
+                    created_date = existing_data.get('created')
+            if not created_date:
+                created_date = datetime.now().isoformat()
 
         # Build photo list with dimensions
         photos = []
