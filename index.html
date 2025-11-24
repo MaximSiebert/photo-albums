@@ -89,7 +89,7 @@
             currentAlbum: null,
             currentPhoto: 1,
             albums: {},
-            sortBy: 'date' // 'name', 'date', 'count'
+            sortBy: 'date-desc' // 'name-asc', 'name-desc', 'date-desc', 'date-asc', 'random'
         };
 
         // Parse URL hash to restore state
@@ -170,9 +170,11 @@
                           <div class="space-y-1">
                             <span>Sort by:</span>
                             <div>
-                                <button id="sort-date" class="block ${state.sortBy === 'date' ? 'underline' : 'hover:underline'}">Date</button>
-                                <button id="sort-name" class="block ${state.sortBy === 'name' ? 'underline' : 'hover:underline'}">Name</button>
-                                <button id="sort-count" class="block ${state.sortBy === 'count' ? 'underline' : 'hover:underline'}">Count</button>
+                                <button id="sort-date-desc" class="block ${state.sortBy === 'date-desc' ? 'underline' : 'hover:underline'}">Newest</button>
+                                <button id="sort-date-asc" class="block ${state.sortBy === 'date-asc' ? 'underline' : 'hover:underline'}">Oldest</button>
+                                <button id="sort-name-asc" class="block ${state.sortBy === 'name-asc' ? 'underline' : 'hover:underline'}">Name (A-Z)</button>
+                                <button id="sort-name-desc" class="block ${state.sortBy === 'name-desc' ? 'underline' : 'hover:underline'}">Name (Z-A)</button>
+                                <button id="sort-random" class="block ${state.sortBy === 'random' ? 'underline' : 'hover:underline'}">Random</button>
                             </div>
                           </div>
                         </div>
@@ -191,36 +193,57 @@
                 }
 
                 // Add sorting button handlers
-                document.getElementById('sort-name').onclick = () => {
-                    state.sortBy = 'name';
+                document.getElementById('sort-name-asc').onclick = () => {
+                    state.sortBy = 'name-asc';
                     render();
                 };
-                document.getElementById('sort-date').onclick = () => {
-                    state.sortBy = 'date';
+                document.getElementById('sort-name-desc').onclick = () => {
+                    state.sortBy = 'name-desc';
                     render();
                 };
-                document.getElementById('sort-count').onclick = () => {
-                    state.sortBy = 'count';
+                document.getElementById('sort-date-desc').onclick = () => {
+                    state.sortBy = 'date-desc';
+                    render();
+                };
+                document.getElementById('sort-date-asc').onclick = () => {
+                    state.sortBy = 'date-asc';
+                    render();
+                };
+                document.getElementById('sort-random').onclick = () => {
+                    state.sortBy = 'random';
                     render();
                 };
 
                 // Sort albums based on current sort option
                 const albumEntries = Object.entries(state.albums);
-                albumEntries.sort((a, b) => {
-                    const [idA, albumA] = a;
-                    const [idB, albumB] = b;
 
-                    if (state.sortBy === 'name') {
-                        return albumA.name.localeCompare(albumB.name);
-                    } else if (state.sortBy === 'date') {
-                        const dateA = albumA.created ? new Date(albumA.created) : new Date(0);
-                        const dateB = albumB.created ? new Date(albumB.created) : new Date(0);
-                        return dateB - dateA; // Newest first
-                    } else if (state.sortBy === 'count') {
-                        return albumB.photos.length - albumA.photos.length; // Most photos first
+                if (state.sortBy === 'random') {
+                    // Fisher-Yates shuffle algorithm
+                    for (let i = albumEntries.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [albumEntries[i], albumEntries[j]] = [albumEntries[j], albumEntries[i]];
                     }
-                    return 0;
-                });
+                } else {
+                    albumEntries.sort((a, b) => {
+                        const [idA, albumA] = a;
+                        const [idB, albumB] = b;
+
+                        if (state.sortBy === 'name-asc') {
+                            return albumA.name.localeCompare(albumB.name); // A-Z
+                        } else if (state.sortBy === 'name-desc') {
+                            return albumB.name.localeCompare(albumA.name); // Z-A
+                        } else if (state.sortBy === 'date-desc') {
+                            const dateA = albumA.created ? new Date(albumA.created) : new Date(0);
+                            const dateB = albumB.created ? new Date(albumB.created) : new Date(0);
+                            return dateB - dateA; // Newest first
+                        } else if (state.sortBy === 'date-asc') {
+                            const dateA = albumA.created ? new Date(albumA.created) : new Date(0);
+                            const dateB = albumB.created ? new Date(albumB.created) : new Date(0);
+                            return dateA - dateB; // Oldest first
+                        }
+                        return 0;
+                    });
+                }
 
                 albumEntries.forEach(([id, album]) => {
                     const li = document.createElement('li');
