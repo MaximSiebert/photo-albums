@@ -356,8 +356,6 @@
                 const isPortrait = (photoWidth && photoHeight) ? photoHeight > photoWidth : false;
                 const orientationClass = isPortrait ? 'sm:h-full sm:w-auto w-full' : 'w-full';
 
-                console.log('Photo dimensions:', { currentPhoto, photoWidth, photoHeight, aspectRatio });
-
                 const photoPath = `/albums/${encodeURIComponent(state.currentAlbum)}/${currentPhotoFilename}`;
 
                 app.innerHTML = `
