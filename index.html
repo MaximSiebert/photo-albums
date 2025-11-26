@@ -168,15 +168,15 @@
             if (state.view === 'index') {
                 app.innerHTML = `
                     <div>
-                        <div class="p-6 grid md:gap-x-10 gap-x-6 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 border-b border-stone-800 dark:border-stone-400">
+                        <div class="p-6 grid md:gap-x-10 gap-x-6 sm:gap-y-0 gap-y-6 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 border-b border-stone-800 dark:border-stone-400">
                           <div class="flex space-x-1 group h-fit">
                             <h1><a href="/photo-albums" class="hover:underline">Albums</a></h1>
                             <span class="text-stone-500 sm:opacity-0 group-hover:opacity-100">(${Object.keys(state.albums).length})</span>
                           </div>
                           <div>
-                            <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" class="w-full bg-stone-100 dark:bg-stone-900 focus:outline-none focus:underline"/>
+                            <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" class="w-full bg-stone-100 dark:bg-stone-900 focus:outline-none focus:underline placeholder-stone-500"/>
                           </div>
-                          <div class="space-y-1">
+                          <div class="space-y-1 sm:col-span-1 sm:col-start-auto col-start-2">
                             <span>Sort by:</span>
                             <div>
                                 <button id="sort-date-desc" class="block ${state.sortBy === 'date-desc' ? 'underline' : 'hover:underline'}">Newest</button>
