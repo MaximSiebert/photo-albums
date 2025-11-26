@@ -460,6 +460,7 @@
                     photoItem.appendChild(img);
                     photoItem.onclick = () => {
                         state.currentPhoto = photoIndex;
+                        state.overlayOpen = false; // Reset overlay state when navigating
                         updateHash();
                         render();
                     };
