@@ -250,12 +250,12 @@
                     });
                 }
 
-                albumEntries.forEach(([id, album]) => {
+                albumEntries.forEach(([id, album], index) => {
                     const li = document.createElement('li');
                     li.className = 'group';
                     const a = document.createElement('a');
                     a.href = '#';
-                    
+
                     // Add cover image if available
                     if (album.photos && album.photos.length > 0) {
                         // Get first photo (support both string and object format)
@@ -291,10 +291,12 @@
                         img.alt = album.name;
                         img.decoding = 'async';
 
-                        // Add fade-in animation after image loads
+                        // Add staggered fade-in animation after image loads
                         img.onload = () => {
-                            img.classList.remove('opacity-0');
-                            img.classList.add('animate-fade-in');
+                            setTimeout(() => {
+                                img.classList.remove('opacity-0');
+                                img.classList.add('animate-fade-in');
+                            }, index * 100); // 50ms delay per item
                         };
 
                         imgContainer.appendChild(img);
