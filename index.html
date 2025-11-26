@@ -18,6 +18,10 @@
                     },
                     animation: {
                         'fade-in': 'fade-in .4s linear'
+                    },
+                    width: {
+                        '160': '160px',
+                        '128': '128px'
                     }
                 }
             }
@@ -89,7 +93,8 @@
             currentAlbum: null,
             currentPhoto: 1,
             albums: {},
-            sortBy: 'date-desc' // 'name-asc', 'name-desc', 'date-desc', 'date-asc', 'random'
+            sortBy: 'date-desc', // 'name-asc', 'name-desc', 'date-desc', 'date-asc', 'random'
+            overlayOpen: false
         };
 
         // Parse URL hash to restore state
@@ -388,7 +393,7 @@
                             <div id="loading-bar" class="h-full bg-stone-200 dark:bg-stone-800 transition-all duration-150" style="width: 0%"></div>
                         </div>
 
-                        <div class="absolute top-0 w-full flex place-content-between px-6 py-6">
+                        <div class="absolute top-0 w-full flex place-content-between px-6 py-6 z-20">
                             <div class="flex space-x-1">
                               <button id="back-btn" class="hover:underline block">
                                 Albums
@@ -396,7 +401,7 @@
                               <span class="text-stone-500">/</span>
                               <h2>${album.name}</h2>
                             </div>
-                            <p class="text-stone-500">(${state.currentPhoto}<span class="text-stone-500">/</span>${album.photos.length})</p>
+                            <button id="photo-count-btn" class="text-stone-500 hover:underline">(${state.currentPhoto}<span class="text-stone-500">/</span>${album.photos.length})</button>
                         </div>
                         <div class="w-full h-dvh md:p-24 sm:p-12 p-6">
                           <div class="w-full h-full flex items-center justify-center relative">
@@ -416,11 +421,77 @@
                             </div>
                           </div>
                         </div>
+
+                        <!-- Photo navigation overlay -->
+                        <div id="photo-overlay-backdrop" class="fixed inset-0 bg-black bg-opacity-0 transition-opacity duration-300 pointer-events-none z-40"></div>
+                        <div id="photo-overlay" class="fixed top-0 right-0 h-full w-128 sm:w-160 bg-stone-100 dark:bg-stone-900 transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto p-6 space-y-6">
+                        </div>
+
                         <!-- ${isLastPhoto ? '<p>End of album - click photo to return</p>' : ''} -->
                     </div>
                 `;
 
                 document.getElementById('back-btn').onclick = backToIndex;
+
+                // Photo overlay functionality
+                const photoOverlay = document.getElementById('photo-overlay');
+                const photoOverlayBackdrop = document.getElementById('photo-overlay-backdrop');
+                let overlayOpen = false;
+
+                // Populate overlay with all photos
+                album.photos.forEach((photo, index) => {
+                    const photoFilename = typeof photo === 'string' ? photo : photo.filename;
+                    const photoIndex = index + 1;
+                    const isCurrentPhoto = photoIndex === state.currentPhoto;
+
+                    const photoItem = document.createElement('div');
+                    photoItem.className = `cursor-pointer ${isCurrentPhoto ? 'outline outline-stone-800 dark:outline-stone-100' : ''}`;
+                    photoItem.id = `overlay-photo-${photoIndex}`;
+
+                    const img = document.createElement('img');
+                    img.className = 'w-full h-auto hover:outline hover:outline-stone-800 dark:hover:outline-stone-100 outline outline-transparent';
+                    img.src = getImageUrl(`/albums/${encodeURIComponent(state.currentAlbum)}/${photoFilename}`, {
+                        width: 200,
+                        quality: 80,
+                        format: 'auto'
+                    });
+                    img.alt = `Photo ${photoIndex}`;
+
+                    photoItem.appendChild(img);
+                    photoItem.onclick = () => {
+                        state.currentPhoto = photoIndex;
+                        updateHash();
+                        render();
+                    };
+
+                    photoOverlay.appendChild(photoItem);
+                });
+
+                // Toggle overlay
+                const toggleOverlay = (show) => {
+                    overlayOpen = show;
+                    state.overlayOpen = show;
+                    if (show) {
+                        photoOverlay.classList.remove('translate-x-full');
+                        photoOverlayBackdrop.classList.remove('bg-opacity-0', 'pointer-events-none');
+                        photoOverlayBackdrop.classList.add('bg-opacity-0');
+
+                        // Scroll current photo into view (centered)
+                        setTimeout(() => {
+                            const currentPhotoEl = document.getElementById(`overlay-photo-${state.currentPhoto}`);
+                            if (currentPhotoEl) {
+                                currentPhotoEl.scrollIntoView({ behavior: 'auto', block: 'center' });
+                            }
+                        }, 50);
+                    } else {
+                        photoOverlay.classList.add('translate-x-full');
+                        photoOverlayBackdrop.classList.add('bg-opacity-0', 'pointer-events-none');
+                        photoOverlayBackdrop.classList.remove('bg-opacity-50');
+                    }
+                };
+
+                document.getElementById('photo-count-btn').onclick = () => toggleOverlay(true);
+                photoOverlayBackdrop.onclick = () => toggleOverlay(false);
 
                 const photoImg = document.getElementById('photo-img');
                 const loadingBar = document.getElementById('loading-bar');
@@ -546,6 +617,9 @@
 
         window.addEventListener('touchend', (e) => {
             if (state.view !== 'viewer') return;
+
+            // Disable swipe navigation when overlay is open
+            if (state.overlayOpen) return;
 
             touchEndX = e.changedTouches[0].screenX;
             touchEndY = e.changedTouches[0].screenY;
