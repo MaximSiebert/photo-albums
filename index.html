@@ -233,14 +233,6 @@
                 // Sort albums based on current sort option
                 let albumEntries = Object.entries(state.albums);
 
-                // Filter albums based on search query
-                if (state.searchQuery) {
-                    const query = state.searchQuery.toLowerCase();
-                    albumEntries = albumEntries.filter(([id, album]) => {
-                        return album.name.toLowerCase().includes(query) || id.toLowerCase().includes(query);
-                    });
-                }
-
                 if (state.sortBy === 'random') {
                     // Fisher-Yates shuffle algorithm
                     for (let i = albumEntries.length - 1; i > 0; i--) {
@@ -272,6 +264,8 @@
                 albumEntries.forEach(([id, album], index) => {
                     const li = document.createElement('li');
                     li.className = 'group';
+                    li.dataset.albumId = id;
+                    li.dataset.albumName = album.name.toLowerCase();
                     const a = document.createElement('a');
                     a.href = '#';
 
@@ -398,6 +392,9 @@
                 document.querySelectorAll('#album-list img').forEach(img => {
                     imageObserver.observe(img);
                 });
+
+                // Always apply search filter to ensure correct visibility
+                filterAlbums();
             } else {
                 const album = state.albums[state.currentAlbum];
                 const currentPhoto = album.photos[state.currentPhoto - 1];
@@ -592,6 +589,22 @@
             state.currentPhoto = 1;
             updateHash();
             render();
+        }
+
+        function filterAlbums() {
+            const query = state.searchQuery.toLowerCase();
+            const albumItems = document.querySelectorAll('#album-list li');
+
+            albumItems.forEach(li => {
+                const albumId = li.dataset.albumId.toLowerCase();
+                const albumName = li.dataset.albumName;
+
+                if (!query || albumName.includes(query) || albumId.includes(query)) {
+                    li.classList.remove('hidden');
+                } else {
+                    li.classList.add('hidden');
+                }
+            });
         }
 
         // Handle browser back/forward buttons
