@@ -274,8 +274,14 @@
 
                         // Add background placeholder
                         const placeholder = document.createElement('div');
-                        placeholder.className = 'absolute inset-0 bg-stone-300 dark:bg-stone-800';
+                        placeholder.className = 'absolute inset-0 bg-stone-300 dark:bg-stone-800 opacity-0';
                         imgContainer.appendChild(placeholder);
+
+                        // Add staggered fade-in animation to placeholder
+                        setTimeout(() => {
+                            placeholder.classList.remove('opacity-0');
+                            placeholder.classList.add('animate-fade-in');
+                        }, index * 100);
 
                         const img = document.createElement('img');
                         img.className = 'relative z-10 w-full h-full object-contain group-hover:outline group-hover:outline-stone-800 dark:group-hover:outline-stone-100 outline outline-transparent opacity-0';
@@ -291,12 +297,12 @@
                         img.alt = album.name;
                         img.decoding = 'async';
 
-                        // Add staggered fade-in animation after image loads
+                        // Add staggered fade-in animation after image loads (with 600ms base delay)
                         img.onload = () => {
                             setTimeout(() => {
                                 img.classList.remove('opacity-0');
                                 img.classList.add('animate-fade-in');
-                            }, index * 100); // 50ms delay per item
+                            }, 600 + (index * 100)); // 600ms base delay + 100ms stagger per item
                         };
 
                         imgContainer.appendChild(img);
