@@ -2,17 +2,7 @@
   "name": "Europe '22",
   "photos": [
     {
-      "filename": "20220630_105130.jpg",
-      "width": 2880,
-      "height": 3840
-    },
-    {
-      "filename": "20220701_112424.jpg",
-      "width": 2880,
-      "height": 3840
-    },
-    {
-      "filename": "20220703_184731.jpg",
+      "filename": "20220703_184729.jpg",
       "width": 2880,
       "height": 3840
     },
@@ -1052,5 +1042,5 @@
       "height": 3840
     }
   ],
-  "created": "2022-06-30T10:51:30"
+  "created": "2022-07-03T11:47:32"
 }
