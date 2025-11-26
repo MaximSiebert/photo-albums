@@ -94,7 +94,8 @@
             currentPhoto: 1,
             albums: {},
             sortBy: 'date-desc', // 'name-asc', 'name-desc', 'date-desc', 'date-asc', 'random'
-            overlayOpen: false
+            overlayOpen: false,
+            searchQuery: ''
         };
 
         // Parse URL hash to restore state
@@ -172,6 +173,9 @@
                             <h1><a href="/photo-albums" class="hover:underline">Albums</a></h1>
                             <span class="text-stone-500 sm:opacity-0 group-hover:opacity-100">(${Object.keys(state.albums).length})</span>
                           </div>
+                          <div>
+                            <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" class="w-full bg-stone-100 dark:bg-stone-900 focus:outline-none focus:underline"/>
+                          </div>
                           <div class="space-y-1">
                             <span>Sort by:</span>
                             <div>
@@ -183,7 +187,7 @@
                             </div>
                           </div>
                         </div>
-                        <ul id="album-list" class="px-6 py-16 md:gap-x-10 gap-x-6 gap-y-12 grid lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-1 items-end"></ul>
+                        <ul id="album-list" class="px-6 py-12 md:gap-x-10 gap-x-6 gap-y-12 grid lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-1 items-end"></ul>
                         <div class="p-6 border-t border-stone-800 dark:border-stone-400">
                           © 2026, All Rights Reserved.
                         </div>
@@ -196,6 +200,13 @@
                     list.innerHTML = '<li>No albums found</li>';
                     return;
                 }
+
+                // Add search input handler
+                const searchInput = document.getElementById('search-input');
+                searchInput.oninput = (e) => {
+                    state.searchQuery = e.target.value;
+                    filterAlbums();
+                };
 
                 // Add sorting button handlers
                 document.getElementById('sort-name-asc').onclick = () => {
@@ -220,7 +231,15 @@
                 };
 
                 // Sort albums based on current sort option
-                const albumEntries = Object.entries(state.albums);
+                let albumEntries = Object.entries(state.albums);
+
+                // Filter albums based on search query
+                if (state.searchQuery) {
+                    const query = state.searchQuery.toLowerCase();
+                    albumEntries = albumEntries.filter(([id, album]) => {
+                        return album.name.toLowerCase().includes(query) || id.toLowerCase().includes(query);
+                    });
+                }
 
                 if (state.sortBy === 'random') {
                     // Fisher-Yates shuffle algorithm
