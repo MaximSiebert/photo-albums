@@ -730,6 +730,19 @@
             render();
         });
 
+        // Fullscreen functionality
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                // Enter fullscreen
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.warn('Could not enter fullscreen:', err);
+                });
+            } else {
+                // Exit fullscreen
+                document.exitFullscreen();
+            }
+        }
+
         // Handle keyboard navigation
         window.addEventListener('keydown', (e) => {
             if (state.view !== 'viewer') return;
@@ -754,10 +767,23 @@
                 }
             } else if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                backToIndex();
+                // Exit fullscreen if active, otherwise back to index
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    backToIndex();
+                }
             } else if (e.key === 'Escape') {
                 e.preventDefault();
-                backToIndex();
+                // Exit fullscreen if active, otherwise back to index
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    backToIndex();
+                }
+            } else if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                toggleFullscreen();
             }
         });
 
