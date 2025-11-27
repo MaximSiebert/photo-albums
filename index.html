@@ -285,8 +285,8 @@
                             <h1><a href="/photo-albums" class="hover:underline">Albums</a></h1>
                             <span class="text-stone-500 sm:opacity-0 group-hover:opacity-100">(${Object.keys(state.albums).length})</span>
                           </div>
-                          <div>
-                            <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" class="w-full bg-transparent focus:outline-none focus:underline placeholder-stone-500"/>
+                          <div class="lg:col-span-4 md:col-span-2 col-span-1">
+                            <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" class="w-full bg-transparent focus:outline-none focus:underline placeholder-stone-800 dark:placeholder-stone-200"/>
                           </div>
                           <div class="space-y-1 sm:col-span-1 sm:col-start-auto col-start-2">
                             <span>Sort by:</span>
@@ -300,8 +300,9 @@
                           </div>
                         </div>
                         <ul id="album-list" class="px-6 py-12 md:gap-x-10 gap-x-6 gap-y-12 grid lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-1 items-end"></ul>
-                        <div class="p-6 border-t border-stone-800 dark:border-stone-400">
-                          © 2026, All Rights Reserved.
+                        <div class="p-6 border-t border-stone-800 dark:border-stone-400 grid md:gap-x-10 gap-x-6 sm:gap-y-0 gap-y-6 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-2">
+                          <span class="lg:col-span-5 md:col-span-3 col-span-1">© 2026, All Rights Reserved.</span>
+                          <span class="text-stone-500">(total_count)</span>
                         </div>
                     </div>
                 `;
@@ -518,7 +519,7 @@
                 const photoHeight = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.height) ? currentPhoto.height : null;
                 const aspectRatio = (photoWidth && photoHeight) ? `${photoWidth} / ${photoHeight}` : 'auto';
                 const isPortrait = (photoWidth && photoHeight) ? photoHeight > photoWidth : false;
-                const orientationClass = isPortrait ? 'w-[130cqmin] max-h-full max-w-full' : 'w-[120cqmin] max-h-full max-w-full';
+                const orientationClass = isPortrait ? 'h-[130cqmin] max-h-full max-w-full' : 'w-[120cqmin] max-h-full max-w-full';
 
                 const photoPath = `/albums/${encodeURIComponent(state.currentAlbum)}/${currentPhotoFilename}`;
 
