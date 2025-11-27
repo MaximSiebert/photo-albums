@@ -3,7 +3,7 @@
 
 ## Run server locally
 - `python3 -m http.server 8000 --bind 0.0.0.0`
-- to visit on mobile device user 1http://YOUR_LOCAL_IP:80001
+- to visit on mobile device use http://YOUR_LOCAL_IP:80001
 run `ipconfig getifaddr en0` to find local IP
 
 ## Steps for adding images
