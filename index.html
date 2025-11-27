@@ -543,7 +543,7 @@
                                 Albums
                               </button>
                               <span class="text-stone-500">/</span>
-                              <h2>${album.name}</h2>
+                              <button id="album-name-btn" class="hover:underline">${album.name}</button>
                             </div>
                             <button id="photo-count-btn" class="text-stone-500 hover:underline">(${state.currentPhoto}<span class="text-stone-500">/</span>${album.photos.length})</button>
                         </div>
@@ -577,6 +577,7 @@
                 `;
 
                 document.getElementById('back-btn').onclick = backToIndex;
+                document.getElementById('album-name-btn').onclick = toggleFullscreen;
 
                 // Photo overlay functionality
                 const photoOverlay = document.getElementById('photo-overlay');
@@ -980,9 +981,15 @@
                 }
             } else {
                 // Vertical swipe
-                if (deltaY < -minSwipeDistance) {
-                    // Swipe up - back to index
-                    backToIndex();
+                if (Math.abs(deltaY) > minSwipeDistance) {
+                    // Check if in fullscreen mode
+                    if (document.fullscreenElement) {
+                        // Exit fullscreen on any vertical swipe (up or down)
+                        document.exitFullscreen();
+                    } else if (deltaY < 0) {
+                        // Swipe up - back to index (only when not in fullscreen)
+                        backToIndex();
+                    }
                 }
             }
         });
