@@ -148,6 +148,12 @@
                 document.body.style.transition = 'background-color 0.4s ease';
                 document.body.style.setProperty('background-color', color, 'important');
 
+                // Apply to overlay if it exists (no need to set transition, it has transition-all in class)
+                const photoOverlay = document.getElementById('photo-overlay');
+                if (photoOverlay) {
+                    photoOverlay.style.setProperty('background-color', color, 'important');
+                }
+
                 console.log('Body background-color after set:', document.body.style.backgroundColor);
             } catch (e) {
                 // CORS or other errors - silently fail
@@ -554,8 +560,8 @@
                         </div>
 
                         <!-- Photo navigation overlay -->
-                        <div id="photo-overlay-backdrop" class="fixed inset-0 bg-black bg-opacity-0 transition-opacity duration-300 pointer-events-none z-40"></div>
-                        <div id="photo-overlay" class="fixed top-0 right-0 h-full w-128 sm:w-160 bg-stone-100 dark:bg-stone-900 transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto p-6 space-y-6">
+                        <div id="photo-overlay-backdrop" class="fixed inset-0 bg-black bg-opacity-0 transition-opacity duration-400 pointer-events-none z-40"></div>
+                        <div id="photo-overlay" class="fixed top-0 right-0 h-full w-128 sm:w-160 transform translate-x-full transition-all duration-400 z-50 overflow-y-auto p-6 space-y-6">
                         </div>
 
                         <!-- ${isLastPhoto ? '<p>End of album - click photo to return</p>' : ''} -->
