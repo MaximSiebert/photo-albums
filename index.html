@@ -518,7 +518,7 @@
                 const photoHeight = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.height) ? currentPhoto.height : null;
                 const aspectRatio = (photoWidth && photoHeight) ? `${photoWidth} / ${photoHeight}` : 'auto';
                 const isPortrait = (photoWidth && photoHeight) ? photoHeight > photoWidth : false;
-                const orientationClass = isPortrait ? 'h-[130cqmin] max-h-full max-w-full' : 'w-[120cqmin] max-h-full max-w-full';
+                const orientationClass = isPortrait ? 'w-[130cqmin] max-h-full max-w-full' : 'w-[120cqmin] max-h-full max-w-full';
 
                 const photoPath = `/albums/${encodeURIComponent(state.currentAlbum)}/${currentPhotoFilename}`;
 
