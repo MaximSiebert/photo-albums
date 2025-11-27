@@ -187,7 +187,7 @@
 
         // Reset ambient lighting when returning to index
         function resetAmbientLighting() {
-            document.body.style.transition = 'background-color 0.8s ease';
+            document.body.style.transition = 'background-color 0.4s ease';
             document.body.style.backgroundColor = '';
         }
 
@@ -280,7 +280,7 @@
                             <span class="text-stone-500 sm:opacity-0 group-hover:opacity-100">(${Object.keys(state.albums).length})</span>
                           </div>
                           <div>
-                            <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" class="w-full bg-stone-100 dark:bg-stone-900 focus:outline-none focus:underline placeholder-stone-500"/>
+                            <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" class="w-full bg-transparent focus:outline-none focus:underline placeholder-stone-500"/>
                           </div>
                           <div class="space-y-1 sm:col-span-1 sm:col-start-auto col-start-2">
                             <span>Sort by:</span>
@@ -536,7 +536,7 @@
                         <div class="w-full h-dvh md:p-24 sm:p-12 p-6">
                           <div class="w-full h-full flex items-center justify-center relative">
                             <div class="absolute inset-50 ${orientationClass}" style="aspect-ratio: ${aspectRatio}; max-width: 100%; max-height: 100%;">
-                              <div class="absolute inset-0 bg-stone-200 dark:bg-stone-800"></div>
+                              <div class="absolute inset-0 bg-black/5 dark:bg-white/10"></div>
                               <img
                                   class="relative z-10 w-full h-full object-contain opacity-0"
                                   id="photo-img"
