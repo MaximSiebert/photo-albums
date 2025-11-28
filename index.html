@@ -205,7 +205,8 @@
             sortBy: 'date-desc', // 'name-asc', 'name-desc', 'date-desc', 'date-asc', 'random'
             overlayOpen: false,
             searchQuery: '',
-            selectedAlbumIndex: -1 // -1 means no album selected, 0+ means album at that index is selected
+            selectedAlbumIndex: -1, // -1 means no album selected, 0+ means album at that index is selected
+            navVisible: true // Track navigation visibility
         };
 
         // Parse URL hash to restore state
@@ -302,8 +303,8 @@
                         </div>
                         <ul id="album-list" class="px-6 py-12 md:gap-x-10 gap-x-6 gap-y-12 grid lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-1 items-end"></ul>
                         <div class="p-6 border-t border-stone-800 dark:border-stone-400 grid md:gap-x-10 gap-x-6 sm:gap-y-0 gap-y-6 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-2">
-                          <span class="lg:col-span-5 md:col-span-3 col-span-1 text-stone-500">(total_count)</span>
-                          <span class="text-stone-500">© 2026, All Rights Reserved.</span>
+                          <span class="lg:col-span-5 md:col-span-3 col-span-1 text-stone-500">(${Object.values(state.albums).reduce((total, album) => total + album.photos.length, 0)})</span>
+                          <span class="text-stone-500">All Rights Reserved, 2026 ©</span>
                         </div>
                     </div>
                 `;
@@ -537,7 +538,7 @@
                             <div id="loading-bar" class="h-full bg-black/5 dark:bg-white/10 transition-all duration-150" style="width: 0%"></div>
                         </div>
 
-                        <div class="absolute top-0 w-full flex place-content-between px-6 py-6 z-20">
+                        <div id="top-nav" class="absolute top-0 w-full flex place-content-between px-6 py-6 z-20 transition-opacity duration-[800ms]">
                             <div class="flex space-x-1">
                               <button id="back-btn" class="hover:underline block">
                                 Albums
@@ -578,6 +579,55 @@
 
                 document.getElementById('back-btn').onclick = backToIndex;
                 document.getElementById('album-name-btn').onclick = toggleFullscreen;
+
+                // Top navigation auto-hide functionality
+                const topNav = document.getElementById('top-nav');
+                let navHideTimer = null;
+
+                function showNav() {
+                    state.navVisible = true;
+                    topNav.style.opacity = '1';
+
+                    // Clear existing timer
+                    if (navHideTimer) {
+                        clearTimeout(navHideTimer);
+                    }
+
+                    // Set timer to hide after 3 seconds
+                    navHideTimer = setTimeout(() => {
+                        state.navVisible = false;
+                        topNav.style.opacity = '0';
+                    }, 3000);
+                }
+
+                function hideNavImmediate() {
+                    if (navHideTimer) {
+                        clearTimeout(navHideTimer);
+                    }
+                    state.navVisible = false;
+                    topNav.style.opacity = '0';
+                }
+
+                // Show nav on hover
+                topNav.addEventListener('mouseenter', () => {
+                    showNav();
+                });
+
+                // Click anywhere except on the image to show nav
+                document.addEventListener('click', (e) => {
+                    if (state.view !== 'viewer') return;
+                    const photoImg = document.getElementById('photo-img');
+                    if (e.target !== photoImg) {
+                        showNav();
+                    }
+                });
+
+                // Initialize: show nav and start timer, unless it was already hidden
+                if (state.navVisible) {
+                    showNav();
+                } else {
+                    topNav.style.opacity = '0';
+                }
 
                 // Photo overlay functionality
                 const photoOverlay = document.getElementById('photo-overlay');
@@ -696,6 +746,7 @@
             state.currentAlbum = albumId;
             state.currentPhoto = 1;
             state.view = 'viewer';
+            state.navVisible = true; // Reset nav to visible when opening album
             updateHash();
             render();
         }
@@ -714,6 +765,7 @@
             state.currentAlbum = null;
             state.currentPhoto = 1;
             state.selectedAlbumIndex = -1; // Reset keyboard selection
+            state.navVisible = true; // Reset nav visibility
             updateHash();
             render();
         }
