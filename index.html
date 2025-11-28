@@ -206,7 +206,8 @@
             overlayOpen: false,
             searchQuery: '',
             selectedAlbumIndex: -1, // -1 means no album selected, 0+ means album at that index is selected
-            navVisible: true // Track navigation visibility
+            navVisible: true, // Track navigation visibility
+            selectedOverlayIndex: -1 // -1 means no photo selected in overlay, 1+ means photo number selected
         };
 
         // Parse URL hash to restore state
@@ -569,7 +570,7 @@
                         </div>
 
                         <!-- Photo navigation overlay -->
-                        <div id="photo-overlay-backdrop" class="fixed inset-0 bg-black bg-opacity-0 transition-opacity duration-400 pointer-events-none z-40"></div>
+                        <div id="photo-overlay-backdrop" class="fixed inset-0 bg-transparent bg-opacity-0 transition-opacity duration-400 pointer-events-none z-40"></div>
                         <div id="photo-overlay" class="fixed top-0 right-0 h-full w-128 sm:w-160 transform translate-x-full transition-all duration-400 z-50 overflow-y-auto p-6 space-y-6">
                         </div>
 
@@ -613,14 +614,19 @@
                     showNav();
                 });
 
-                // Click anywhere except on the image to show nav
-                document.addEventListener('click', (e) => {
-                    if (state.view !== 'viewer') return;
+                // Click handler for showing nav (attached to container, not document)
+                const clickHandler = (e) => {
                     const photoImg = document.getElementById('photo-img');
-                    if (e.target !== photoImg) {
+                    const overlay = document.getElementById('photo-overlay');
+
+                    // Don't show nav if clicking on image or inside overlay
+                    if (e.target !== photoImg && !overlay.contains(e.target) && !photoImg.contains(e.target)) {
                         showNav();
                     }
-                });
+                };
+
+                // Attach to the app container instead of document
+                document.getElementById('app').addEventListener('click', clickHandler);
 
                 // Initialize: show nav and start timer, unless it was already hidden
                 if (state.navVisible) {
@@ -654,9 +660,11 @@
                     img.alt = `Photo ${photoIndex}`;
 
                     photoItem.appendChild(img);
-                    photoItem.onclick = () => {
+                    photoItem.onclick = (e) => {
+                        e.stopPropagation();
                         state.currentPhoto = photoIndex;
                         state.overlayOpen = false; // Reset overlay state when navigating
+                        // Don't change navVisible - preserve current state
                         updateHash();
                         render();
                     };
@@ -673,6 +681,10 @@
                         photoOverlayBackdrop.classList.remove('bg-opacity-0', 'pointer-events-none');
                         photoOverlayBackdrop.classList.add('bg-opacity-0');
 
+                        // Initialize keyboard selection to current photo
+                        state.selectedOverlayIndex = state.currentPhoto;
+                        updateOverlaySelectionVisual();
+
                         // Scroll current photo into view (centered)
                         setTimeout(() => {
                             const currentPhotoEl = document.getElementById(`overlay-photo-${state.currentPhoto}`);
@@ -684,6 +696,8 @@
                         photoOverlay.classList.add('translate-x-full');
                         photoOverlayBackdrop.classList.add('bg-opacity-0', 'pointer-events-none');
                         photoOverlayBackdrop.classList.remove('bg-opacity-50');
+                        // Reset selection when closing
+                        state.selectedOverlayIndex = -1;
                     }
                 };
 
@@ -732,9 +746,15 @@
                 };
 
                 if (isLastPhoto) {
-                    photoImg.onclick = backToIndex;
+                    photoImg.onclick = (e) => {
+                        e.stopPropagation();
+                        backToIndex();
+                    };
                 } else {
-                    photoImg.onclick = nextPhoto;
+                    photoImg.onclick = (e) => {
+                        e.stopPropagation();
+                        nextPhoto();
+                    };
                 }
 
                 // Preload the next image for instant navigation
@@ -795,6 +815,31 @@
                 } else {
                     img.classList.add('outline-transparent');
                     img.classList.remove('outline-stone-800', 'dark:outline-stone-100');
+                }
+            });
+        }
+
+        function updateOverlaySelectionVisual() {
+            const photoItems = document.querySelectorAll('#photo-overlay > div[id^="overlay-photo-"]');
+            photoItems.forEach((item) => {
+                const photoNum = parseInt(item.id.replace('overlay-photo-', ''));
+                if (photoNum === state.selectedOverlayIndex) {
+                    item.classList.remove('outline-transparent');
+                    item.classList.add('outline', 'outline-stone-800', 'dark:outline-stone-100');
+                    // Remove hover outline classes to prevent conflict
+                    const img = item.querySelector('img');
+                    if (img) {
+                        img.classList.remove('hover:outline', 'hover:outline-stone-800', 'dark:hover:outline-stone-100');
+                    }
+                } else {
+                    // Remove selection outline completely
+                    item.classList.remove('outline', 'outline-stone-800', 'dark:outline-stone-100');
+                    item.classList.add('outline-transparent');
+                    // Restore hover classes
+                    const img = item.querySelector('img');
+                    if (img) {
+                        img.classList.add('hover:outline', 'hover:outline-stone-800', 'dark:hover:outline-stone-100');
+                    }
                 }
             });
         }
@@ -933,7 +978,64 @@
                 // Photo viewer navigation
                 const album = state.albums[state.currentAlbum];
 
-                if (e.key === 'ArrowRight') {
+                // Spacebar toggles overlay
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    const photoOverlay = document.getElementById('photo-overlay');
+                    const isOpen = !photoOverlay.classList.contains('translate-x-full');
+
+                    if (isOpen) {
+                        // Close overlay
+                        photoOverlay.classList.add('translate-x-full');
+                        const backdrop = document.getElementById('photo-overlay-backdrop');
+                        backdrop.classList.add('bg-opacity-0', 'pointer-events-none');
+                        state.overlayOpen = false;
+                        state.selectedOverlayIndex = -1;
+                    } else {
+                        // Open overlay
+                        photoOverlay.classList.remove('translate-x-full');
+                        const backdrop = document.getElementById('photo-overlay-backdrop');
+                        backdrop.classList.remove('bg-opacity-0', 'pointer-events-none');
+                        state.overlayOpen = true;
+                        state.selectedOverlayIndex = state.currentPhoto;
+                        updateOverlaySelectionVisual();
+
+                        // Scroll selected photo into view
+                        setTimeout(() => {
+                            const selectedPhotoEl = document.getElementById(`overlay-photo-${state.selectedOverlayIndex}`);
+                            if (selectedPhotoEl) {
+                                selectedPhotoEl.scrollIntoView({ behavior: 'auto', block: 'center' });
+                            }
+                        }, 50);
+                    }
+                } else if (state.overlayOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+                    // Navigate overlay with arrow keys when open
+                    e.preventDefault();
+                    const direction = e.key === 'ArrowDown' ? 1 : -1;
+                    const newIndex = state.selectedOverlayIndex + direction;
+
+                    // Clamp to valid range
+                    if (newIndex >= 1 && newIndex <= album.photos.length) {
+                        state.selectedOverlayIndex = newIndex;
+                        updateOverlaySelectionVisual();
+
+                        // Auto-scroll selected photo into view
+                        const selectedPhotoEl = document.getElementById(`overlay-photo-${state.selectedOverlayIndex}`);
+                        if (selectedPhotoEl) {
+                            selectedPhotoEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }
+                } else if (state.overlayOpen && e.key === 'Enter') {
+                    // Navigate to selected photo in overlay
+                    e.preventDefault();
+                    if (state.selectedOverlayIndex >= 1 && state.selectedOverlayIndex <= album.photos.length) {
+                        state.currentPhoto = state.selectedOverlayIndex;
+                        state.overlayOpen = false;
+                        state.selectedOverlayIndex = -1;
+                        updateHash();
+                        render();
+                    }
+                } else if (e.key === 'ArrowRight') {
                     e.preventDefault();
                     if (state.currentPhoto >= album.photos.length) {
                         backToIndex();
@@ -949,7 +1051,7 @@
                         updateHash();
                         render();
                     }
-                } else if (e.key === 'ArrowDown') {
+                } else if (e.key === 'ArrowDown' && !state.overlayOpen) {
                     e.preventDefault();
                     // Exit fullscreen if active, otherwise back to index
                     if (document.fullscreenElement) {
@@ -959,8 +1061,15 @@
                     }
                 } else if (e.key === 'Escape') {
                     e.preventDefault();
-                    // Exit fullscreen if active, otherwise back to index
-                    if (document.fullscreenElement) {
+                    // Close overlay if open, otherwise exit fullscreen or back to index
+                    if (state.overlayOpen) {
+                        const photoOverlay = document.getElementById('photo-overlay');
+                        photoOverlay.classList.add('translate-x-full');
+                        const backdrop = document.getElementById('photo-overlay-backdrop');
+                        backdrop.classList.add('bg-opacity-0', 'pointer-events-none');
+                        state.overlayOpen = false;
+                        state.selectedOverlayIndex = -1;
+                    } else if (document.fullscreenElement) {
                         document.exitFullscreen();
                     } else {
                         backToIndex();
