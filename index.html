@@ -594,11 +594,11 @@
                         clearTimeout(navHideTimer);
                     }
 
-                    // Set timer to hide after 3 seconds
+                    // Set timer to hide after 2 seconds
                     navHideTimer = setTimeout(() => {
                         state.navVisible = false;
                         topNav.style.opacity = '0';
-                    }, 3000);
+                    }, 2000);
                 }
 
                 function hideNavImmediate() {
@@ -807,14 +807,34 @@
         }
 
         function updateAlbumSelectionVisual() {
-            const albumImages = document.querySelectorAll('#album-list img');
-            albumImages.forEach((img, index) => {
-                if (parseInt(img.dataset.albumIndex) === state.selectedAlbumIndex) {
-                    img.classList.remove('outline-transparent');
-                    img.classList.add('outline', 'outline-stone-800', 'dark:outline-stone-100');
+            const albumItems = document.querySelectorAll('#album-list li');
+            albumItems.forEach((li) => {
+                const img = li.querySelector('img');
+                const count = li.querySelector('.text-stone-500');
+                const albumIndex = parseInt(li.dataset.albumIndex);
+
+                if (albumIndex === state.selectedAlbumIndex) {
+                    // Add outline to image
+                    if (img) {
+                        img.classList.remove('outline-transparent');
+                        img.classList.add('outline', 'outline-stone-800', 'dark:outline-stone-100');
+                    }
+                    // Show count
+                    if (count) {
+                        count.classList.remove('sm:opacity-0');
+                        count.classList.add('opacity-100');
+                    }
                 } else {
-                    img.classList.add('outline-transparent');
-                    img.classList.remove('outline-stone-800', 'dark:outline-stone-100');
+                    // Remove outline from image
+                    if (img) {
+                        img.classList.add('outline-transparent');
+                        img.classList.remove('outline-stone-800', 'dark:outline-stone-100');
+                    }
+                    // Hide count
+                    if (count) {
+                        count.classList.add('sm:opacity-0');
+                        count.classList.remove('opacity-100');
+                    }
                 }
             });
         }
@@ -966,13 +986,21 @@
                     navigateAlbumSelection(-1, false);
                 } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
-                    navigateAlbumSelection(1, true);
+                    // Exit fullscreen if active, otherwise navigate down
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    } else {
+                        navigateAlbumSelection(1, true);
+                    }
                 } else if (e.key === 'ArrowUp') {
                     e.preventDefault();
                     navigateAlbumSelection(-1, true);
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
                     openSelectedAlbum();
+                } else if (e.key === 'f' || e.key === 'F') {
+                    e.preventDefault();
+                    toggleFullscreen();
                 }
             } else if (state.view === 'viewer') {
                 // Photo viewer navigation
