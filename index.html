@@ -1001,6 +1001,9 @@
                 } else if (e.key === 'f' || e.key === 'F') {
                     e.preventDefault();
                     toggleFullscreen();
+                } else if (e.key === 'i' || e.key === 'I') {
+                    e.preventDefault();
+                    backToIndex();
                 }
             } else if (state.view === 'viewer') {
                 // Photo viewer navigation
@@ -1105,6 +1108,9 @@
                 } else if (e.key === 'f' || e.key === 'F') {
                     e.preventDefault();
                     toggleFullscreen();
+                } else if (e.key === 'i' || e.key === 'I') {
+                    e.preventDefault();
+                    backToIndex();
                 }
             }
         });
