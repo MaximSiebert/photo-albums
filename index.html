@@ -986,12 +986,7 @@
                     navigateAlbumSelection(-1, false);
                 } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
-                    // Exit fullscreen if active, otherwise navigate down
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                    } else {
-                        navigateAlbumSelection(1, true);
-                    }
+                    navigateAlbumSelection(1, true);
                 } else if (e.key === 'ArrowUp') {
                     e.preventDefault();
                     navigateAlbumSelection(-1, true);
@@ -1084,12 +1079,7 @@
                     }
                 } else if (e.key === 'ArrowDown' && !state.overlayOpen) {
                     e.preventDefault();
-                    // Exit fullscreen if active, otherwise back to index
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                    } else {
-                        backToIndex();
-                    }
+                    backToIndex();
                 } else if (e.key === 'Escape') {
                     e.preventDefault();
                     // Close overlay if open, otherwise exit fullscreen or back to index
