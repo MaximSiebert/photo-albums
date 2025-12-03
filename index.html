@@ -790,17 +790,34 @@
                     loadingBar.classList.add('bg-red-500');
                 };
 
-                if (isLastPhoto) {
-                    photoImg.onclick = (e) => {
-                        e.stopPropagation();
-                        backToIndex();
-                    };
-                } else {
-                    photoImg.onclick = (e) => {
-                        e.stopPropagation();
-                        nextPhoto();
-                    };
-                }
+                photoImg.onclick = (e) => {
+                    e.stopPropagation();
+
+                    // Get click position relative to image
+                    const rect = photoImg.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const imageWidth = rect.width;
+                    const clickPercentage = clickX / imageWidth;
+
+                    // Left 30% - go to previous photo
+                    if (clickPercentage < 0.30) {
+                        if (state.currentPhoto === 1) {
+                            backToIndex();
+                        } else {
+                            state.currentPhoto--;
+                            updateHash();
+                            render();
+                        }
+                    }
+                    // Right 70% - go to next photo
+                    else {
+                        if (state.currentPhoto >= album.photos.length) {
+                            backToIndex();
+                        } else {
+                            nextPhoto();
+                        }
+                    }
+                };
 
                 // Preload the next image for instant navigation
                 preloadNextImage();
