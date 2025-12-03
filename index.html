@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Albums</title>
+    <title>Albums by Maxim</title>
+
+    <!-- Open Graph meta tags (will be updated dynamically) -->
+    <meta property="og:title" content="Albums by Maxim" id="og-title">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="" id="og-image">
+    <meta property="og:url" content="" id="og-url">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -281,6 +288,12 @@
                 // Reset ambient lighting when returning to index
                 resetAmbientLighting();
 
+                // Set page title and meta tags
+                document.title = 'Albums by Maxim';
+                document.getElementById('og-title').setAttribute('content', 'Albums by Maxim');
+                document.getElementById('og-image').setAttribute('content', '');
+                document.getElementById('og-url').setAttribute('content', window.location.href);
+
                 app.innerHTML = `
                     <div>
                         <div class="p-6 grid md:gap-x-10 gap-x-6 sm:gap-y-0 gap-y-6 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 border-b border-stone-800 dark:border-stone-400">
@@ -522,6 +535,19 @@
                 const currentPhoto = album.photos[state.currentPhoto - 1];
                 const currentPhotoFilename = typeof currentPhoto === 'string' ? currentPhoto : currentPhoto.filename;
                 const isLastPhoto = state.currentPhoto >= album.photos.length;
+
+                // Set page title and meta tags
+                document.title = `${album.name} | Albums by Maxim`;
+                document.getElementById('og-title').setAttribute('content', `${album.name} | Albums by Maxim`);
+
+                // Set og:image to the current photo
+                const currentPhotoUrl = getImageUrl(`/albums/${encodeURIComponent(state.currentAlbum)}/${currentPhotoFilename}`, {
+                    width: 1200,
+                    quality: 85,
+                    format: 'auto'
+                });
+                document.getElementById('og-image').setAttribute('content', currentPhotoUrl);
+                document.getElementById('og-url').setAttribute('content', window.location.href);
 
                 // Get dimensions if available
                 const photoWidth = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.width) ? currentPhoto.width : null;
