@@ -9,6 +9,8 @@
     <meta property="og:title" content="Albums by Maxim" id="og-title">
     <meta property="og:type" content="website">
     <meta property="og:image" content="" id="og-image">
+    <meta property="og:image:width" content="1200" id="og-image-width">
+    <meta property="og:image:height" content="630" id="og-image-height">
     <meta property="og:url" content="" id="og-url">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -292,6 +294,8 @@
                 document.title = 'Albums by Maxim';
                 document.getElementById('og-title').setAttribute('content', 'Albums by Maxim');
                 document.getElementById('og-image').setAttribute('content', '');
+                document.getElementById('og-image-width').setAttribute('content', '1200');
+                document.getElementById('og-image-height').setAttribute('content', '630');
                 document.getElementById('og-url').setAttribute('content', window.location.href);
 
                 app.innerHTML = `
@@ -536,6 +540,10 @@
                 const currentPhotoFilename = typeof currentPhoto === 'string' ? currentPhoto : currentPhoto.filename;
                 const isLastPhoto = state.currentPhoto >= album.photos.length;
 
+                // Get dimensions if available
+                const photoWidth = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.width) ? currentPhoto.width : null;
+                const photoHeight = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.height) ? currentPhoto.height : null;
+
                 // Set page title and meta tags
                 document.title = `${album.name} | Albums by Maxim`;
                 document.getElementById('og-title').setAttribute('content', `${album.name} | Albums by Maxim`);
@@ -547,11 +555,22 @@
                     format: 'auto'
                 });
                 document.getElementById('og-image').setAttribute('content', currentPhotoUrl);
-                document.getElementById('og-url').setAttribute('content', window.location.href);
 
-                // Get dimensions if available
-                const photoWidth = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.width) ? currentPhoto.width : null;
-                const photoHeight = (currentPhoto && typeof currentPhoto === 'object' && currentPhoto.height) ? currentPhoto.height : null;
+                // Set og:image dimensions (use actual photo dimensions or defaults)
+                if (photoWidth && photoHeight) {
+                    // Scale to max width of 1200 while maintaining aspect ratio
+                    const scale = Math.min(1200 / photoWidth, 1);
+                    const ogWidth = Math.round(photoWidth * scale);
+                    const ogHeight = Math.round(photoHeight * scale);
+                    document.getElementById('og-image-width').setAttribute('content', ogWidth.toString());
+                    document.getElementById('og-image-height').setAttribute('content', ogHeight.toString());
+                } else {
+                    // Default to 1200x630 (recommended OG image size)
+                    document.getElementById('og-image-width').setAttribute('content', '1200');
+                    document.getElementById('og-image-height').setAttribute('content', '630');
+                }
+
+                document.getElementById('og-url').setAttribute('content', window.location.href);
                 const aspectRatio = (photoWidth && photoHeight) ? `${photoWidth} / ${photoHeight}` : 'auto';
                 const isPortrait = (photoWidth && photoHeight) ? photoHeight > photoWidth : false;
                 const orientationClass = isPortrait ? 'sm:h-[100cqmin] sm:w-auto w-[100cqmin] max-h-full max-w-full' : 'w-[110cqmin] max-h-full max-w-full';
