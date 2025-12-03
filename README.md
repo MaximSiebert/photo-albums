@@ -9,8 +9,8 @@ run `ipconfig getifaddr en0` to find local IP
 ## Steps for adding images
 - Create new folder under /albums and add photos
 - Run `python3 generate_album_lists.py`
-- Upload album to R2 Cloudfare using `rclone sync ./albums r2:my-photo-albums/albums --progress --exclude "*.DS_Store" --exclude ".git/*"`
 - Push to github
+- Upload album to R2 Cloudfare using `rclone sync ./albums r2:my-photo-albums/albums --progress --exclude "*.DS_Store" --exclude ".git/*"`
 
 ## Syncing 
 - `rclone sync ./albums r2:my-photo-albums/albums --progress --exclude "*.DS_Store" --exclude ".git/*"`
