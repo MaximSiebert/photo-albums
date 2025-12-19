@@ -174,7 +174,7 @@ export function renderAlbumList() {
                 <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" aria-label="Search albums" class="w-full bg-transparent focus:outline-none focus:underline placeholder-stone-800 dark:placeholder-stone-200"/>
               </div>
               <div class="space-y-1 sm:col-span-1 sm:col-start-auto col-start-2" role="navigation" aria-label="Sort options">
-                <span>Sort by:</span>
+                <span class="text-stone-500">Sort by:</span>
                 <div>
                     <button id="sort-date-desc" aria-label="Sort albums by newest first" aria-pressed="${state.sortBy === 'date-desc'}" class="block ${state.sortBy === 'date-desc' ? 'underline' : 'hover:underline'}">Newest</button>
                     <button id="sort-date-asc" aria-label="Sort albums by oldest first" aria-pressed="${state.sortBy === 'date-asc'}" class="block ${state.sortBy === 'date-asc' ? 'underline' : 'hover:underline'}">Oldest</button>
