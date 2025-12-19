@@ -1,0 +1,26 @@
+{
+  "name": "photo-albums",
+  "version": "1.0.0",
+  "description": "- `python3 generate_album_lists.py`",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaximSiebert/photo-albums.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/MaximSiebert/photo-albums/issues"
+  },
+  "homepage": "https://github.com/MaximSiebert/photo-albums#readme",
+  "devDependencies": {
+    "vite": "^7.3.0"
+  }
+}

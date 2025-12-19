@@ -10,3 +10,9 @@
 
 # But keep the JSON files
 !*.json
+
+# Node modules
+node_modules/
+
+# Keep dist for GitHub Pages deployment
+# dist/
