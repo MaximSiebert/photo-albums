@@ -164,23 +164,23 @@ export function renderAlbumList() {
 
     const app = document.getElementById('app');
     app.innerHTML = `
-        <div>
+        <div role="main" aria-label="Photo albums">
             <div class="p-6 grid md:gap-x-10 gap-x-6 sm:gap-y-0 gap-y-6 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 border-b border-stone-800 dark:border-stone-400">
               <div class="flex space-x-1 group h-fit">
                 <h1><a href="/photo-albums" class="hover:underline">Albums</a></h1>
                 <span class="text-stone-500 sm:opacity-0 group-hover:opacity-100">(${Object.keys(state.albums).length})</span>
               </div>
-              <div class="lg:col-span-4 md:col-span-2 col-span-1">
-                <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" class="w-full bg-transparent focus:outline-none focus:underline placeholder-stone-800 dark:placeholder-stone-200"/>
+              <div class="lg:col-span-4 md:col-span-2 col-span-1" role="search">
+                <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" aria-label="Search albums" class="w-full bg-transparent focus:outline-none focus:underline placeholder-stone-800 dark:placeholder-stone-200"/>
               </div>
-              <div class="space-y-1 sm:col-span-1 sm:col-start-auto col-start-2">
+              <div class="space-y-1 sm:col-span-1 sm:col-start-auto col-start-2" role="navigation" aria-label="Sort options">
                 <span>Sort by:</span>
                 <div>
-                    <button id="sort-date-desc" class="block ${state.sortBy === 'date-desc' ? 'underline' : 'hover:underline'}">Newest</button>
-                    <button id="sort-date-asc" class="block ${state.sortBy === 'date-asc' ? 'underline' : 'hover:underline'}">Oldest</button>
-                    <button id="sort-name-asc" class="block ${state.sortBy === 'name-asc' ? 'underline' : 'hover:underline'}">Name (A-Z)</button>
-                    <button id="sort-name-desc" class="block ${state.sortBy === 'name-desc' ? 'underline' : 'hover:underline'}">Name (Z-A)</button>
-                    <button id="sort-random" class="block ${state.sortBy === 'random' ? 'underline' : 'hover:underline'}">Random</button>
+                    <button id="sort-date-desc" aria-label="Sort albums by newest first" aria-pressed="${state.sortBy === 'date-desc'}" class="block ${state.sortBy === 'date-desc' ? 'underline' : 'hover:underline'}">Newest</button>
+                    <button id="sort-date-asc" aria-label="Sort albums by oldest first" aria-pressed="${state.sortBy === 'date-asc'}" class="block ${state.sortBy === 'date-asc' ? 'underline' : 'hover:underline'}">Oldest</button>
+                    <button id="sort-name-asc" aria-label="Sort albums alphabetically A to Z" aria-pressed="${state.sortBy === 'name-asc'}" class="block ${state.sortBy === 'name-asc' ? 'underline' : 'hover:underline'}">Name (A-Z)</button>
+                    <button id="sort-name-desc" aria-label="Sort albums alphabetically Z to A" aria-pressed="${state.sortBy === 'name-desc'}" class="block ${state.sortBy === 'name-desc' ? 'underline' : 'hover:underline'}">Name (Z-A)</button>
+                    <button id="sort-random" aria-label="Sort albums randomly" aria-pressed="${state.sortBy === 'random'}" class="block ${state.sortBy === 'random' ? 'underline' : 'hover:underline'}">Random</button>
                 </div>
               </div>
             </div>
@@ -209,18 +209,23 @@ export function renderAlbumList() {
     // Add sorting button handlers
     document.getElementById('sort-name-asc').onclick = () => {
         state.sortBy = 'name-asc';
+        renderAlbumList();
     };
     document.getElementById('sort-name-desc').onclick = () => {
         state.sortBy = 'name-desc';
+        renderAlbumList();
     };
     document.getElementById('sort-date-desc').onclick = () => {
         state.sortBy = 'date-desc';
+        renderAlbumList();
     };
     document.getElementById('sort-date-asc').onclick = () => {
         state.sortBy = 'date-asc';
+        renderAlbumList();
     };
     document.getElementById('sort-random').onclick = () => {
         state.sortBy = 'random';
+        renderAlbumList();
     };
 
     // Sort albums based on current sort option

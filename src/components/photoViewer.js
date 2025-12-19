@@ -111,17 +111,17 @@ export function renderPhotoViewer() {
 
             <div id="top-nav" class="absolute top-0 w-full flex place-content-between px-6 py-6 z-20 transition-opacity duration-[800ms]">
                 <div class="flex space-x-1">
-                  <button id="back-btn" class="hover:underline block">
+                  <button id="back-btn" aria-label="Return to album list" class="hover:underline block">
                     Albums
                   </button>
                   <span class="text-stone-500">/</span>
-                  <button id="album-name-btn" class="hover:underline"> ${album.name}</button>
+                  <button id="album-name-btn" aria-label="Toggle fullscreen mode" class="hover:underline"> ${album.name}</button>
                 </div>
-                <button id="photo-count-btn" class="text-stone-500 hover:underline flex items-center">
+                <button id="photo-count-btn" aria-label="View all photos in overlay, currently viewing photo ${state.currentPhoto} of ${album.photos.length}" class="text-stone-500 hover:underline flex items-center">
                     (${state.currentPhoto}
                     <span class="text-stone-500">/</span>
                     ${album.photos.length})
-                    <span class="ml-1">
+                    <span class="ml-1" aria-hidden="true">
                         <svg viewBox="0 0 12 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg" id="More-2-Line--Streamline-Remix" height="12" width="12">
                           <desc>
                             More 2 Line Streamline Icon: https://streamlinehq.com
@@ -141,7 +141,7 @@ export function renderPhotoViewer() {
                       srcset="${generateSrcset(photoPath, [800, 1200, 1920], 85)}"
                       sizes="100vw"
                       src="${getImageUrl(photoPath, { width: 1920, quality: 85, format: 'auto' })}"
-                      alt="Photo ${state.currentPhoto}"
+                      alt="${album.name}, photo ${state.currentPhoto} of ${album.photos.length}"
                       style="cursor: pointer"
                       loading="eager"
                       decoding="async"
@@ -237,7 +237,7 @@ export function renderPhotoViewer() {
             quality: 80,
             format: 'auto'
         });
-        img.alt = `Photo ${photoIndex}`;
+        img.alt = `Thumbnail ${photoIndex} of ${album.photos.length} in ${album.name}`;
 
         photoItem.appendChild(img);
         photoItem.onclick = (e) => {

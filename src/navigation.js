@@ -164,11 +164,29 @@ export function setupTouchNavigation(renderCallback) {
     let touchStartY = 0;
     let touchEndX = 0;
     let touchEndY = 0;
+    let isMultiTouch = false;
 
     window.addEventListener('touchstart', (e) => {
         if (state.view !== 'viewer') return;
+
+        // Detect multi-touch (pinch/zoom)
+        if (e.touches.length > 1) {
+            isMultiTouch = true;
+            return;  // Don't track position for multi-touch
+        }
+
+        isMultiTouch = false;
         touchStartX = e.changedTouches[0].screenX;
         touchStartY = e.changedTouches[0].screenY;
+    });
+
+    // Detect multi-touch added mid-gesture
+    window.addEventListener('touchmove', (e) => {
+        if (state.view !== 'viewer') return;
+
+        if (e.touches.length > 1) {
+            isMultiTouch = true;
+        }
     });
 
     window.addEventListener('touchend', (e) => {
@@ -176,6 +194,21 @@ export function setupTouchNavigation(renderCallback) {
 
         // Disable swipe navigation when overlay is open
         if (state.overlayOpen) return;
+
+        // Ignore swipe if multi-touch was detected
+        if (isMultiTouch) {
+            // Reset flag only when all touches are released
+            if (e.touches.length === 0) {
+                isMultiTouch = false;
+            }
+            return;
+        }
+
+        // Disable swipe navigation when viewport is zoomed in
+        // Users want to pan when zoomed, not navigate to next/prev photo
+        if (window.visualViewport && window.visualViewport.scale > 1) {
+            return;  // Ignore swipe gestures while zoomed
+        }
 
         touchEndX = e.changedTouches[0].screenX;
         touchEndY = e.changedTouches[0].screenY;
