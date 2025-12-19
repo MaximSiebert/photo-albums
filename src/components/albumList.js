@@ -3,6 +3,9 @@ import { getImageUrl, generateSrcset } from '../utils/imageUtils.js';
 import { resetAmbientLighting } from '../utils/colorUtils.js';
 
 export function openAlbum(albumId) {
+    // Save current scroll position before leaving album list
+    state.scrollPosition = window.scrollY;
+
     state.currentAlbum = albumId;
     state.currentPhoto = 1;
     state.view = 'viewer';
@@ -387,4 +390,13 @@ export function renderAlbumList() {
 
     // Update keyboard selection visual state if needed
     updateAlbumSelectionVisual();
+
+    // Restore scroll position immediately to prevent visual jump
+    // Scroll before next paint using 'auto' behavior for instant restoration
+    if (state.scrollPosition > 0) {
+        window.scrollTo({
+            top: state.scrollPosition,
+            behavior: 'auto'  // Instant scroll, no animation
+        });
+    }
 }

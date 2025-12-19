@@ -220,6 +220,9 @@ export function setupTouchNavigation(renderCallback) {
         // Minimum swipe distance to trigger action (50px)
         const minSwipeDistance = 50;
 
+        // Flag to track if navigation will occur
+        let willNavigate = false;
+
         // Determine if horizontal or vertical swipe
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
             // Horizontal swipe
@@ -254,10 +257,21 @@ export function setupTouchNavigation(renderCallback) {
                     document.exitFullscreen();
                 } else if (deltaY < 0) {
                     // Swipe up - back to index (only when not in fullscreen)
+                    willNavigate = true;
                     backToIndex();
                     renderCallback();
                 }
             }
+        }
+
+        // Prevent scroll momentum when navigating back to index
+        if (willNavigate) {
+            e.preventDefault();
+            // Stop any ongoing scroll momentum
+            document.body.style.overflow = 'hidden';
+            requestAnimationFrame(() => {
+                document.body.style.overflow = '';
+            });
         }
     });
 }

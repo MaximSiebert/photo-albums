@@ -8,7 +8,8 @@ export const state = {
     searchQuery: '',
     selectedAlbumIndex: -1, // -1 means no album selected, 0+ means album at that index is selected
     navVisible: true, // Track navigation visibility
-    selectedOverlayIndex: -1 // -1 means no photo selected in overlay, 1+ means photo number selected
+    selectedOverlayIndex: -1, // -1 means no photo selected in overlay, 1+ means photo number selected
+    scrollPosition: 0 // Track album list scroll position
 };
 
 // Parse URL hash to restore state
