@@ -174,7 +174,7 @@ export function renderAlbumList() {
                 <span class="text-stone-500 sm:opacity-0 group-hover:opacity-100">(${Object.keys(state.albums).length})</span>
               </div>
               <div class="lg:col-span-4 md:col-span-2 col-span-1" role="search">
-                <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" aria-label="Search albums" class="w-full bg-transparent focus:outline-none focus:underline placeholder-stone-800 dark:placeholder-stone-200"/>
+                <input id="search-input" type="text" placeholder="Search" value="${state.searchQuery}" aria-label="Search albums" class="w-full bg-transparent focus:outline-none focus:underline hover:underline placeholder-stone-800 dark:placeholder-stone-200"/>
               </div>
               <div class="space-y-1 sm:col-span-1 sm:col-start-auto col-start-2" role="navigation" aria-label="Sort options">
                 <span class="text-stone-500">Sort by:</span>
