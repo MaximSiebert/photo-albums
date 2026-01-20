@@ -14,6 +14,12 @@ export function setupHashChangeListener(renderCallback) {
 // Handle keyboard navigation
 export function setupKeyboardNavigation(renderCallback) {
     window.addEventListener('keydown', (e) => {
+        // Prevent shortcuts when search input is focused
+        const searchInput = document.getElementById('search-input');
+        if (searchInput && document.activeElement === searchInput) {
+            return; // Allow normal text input behavior
+        }
+
         if (state.view === 'index') {
             // Album list navigation
             if (e.key === 'ArrowRight') {

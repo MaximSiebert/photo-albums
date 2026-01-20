@@ -60,7 +60,8 @@ npm run preview
 2. Run `python3 generate_album_lists.py` to generate metadata
 3. Push to GitHub
 4. Upload album to R2 Cloudflare using:
-   ```bash
+   ```
+   bash
    rclone sync ./albums r2:my-photo-albums/albums --progress --exclude "*.DS_Store" --exclude ".git/*"
    ```
 
