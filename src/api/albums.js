@@ -10,7 +10,7 @@ export async function loadAlbums(renderCallback) {
         // Load each album's photos
         for (const albumId of albumsList.albums) {
             try {
-                const photosResponse = await fetch(`./albums/${encodeURIComponent(albumId)}/photos.json`);
+                const photosResponse = await fetch(`./albums/${albumId}/photos.json`);
                 const photosData = await photosResponse.json();
                 state.albums[albumId] = {
                     name: photosData.name || albumId,
