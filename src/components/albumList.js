@@ -170,7 +170,7 @@ export function renderAlbumList() {
         <div role="main" aria-label="Photo albums">
             <div class="p-6 grid md:gap-x-10 gap-x-6 sm:gap-y-0 gap-y-6 lg:grid-cols-6 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 border-b border-stone-800 dark:border-stone-400">
               <div class="flex space-x-1 group h-fit">
-                <h1><a href="/photo-albums" class="hover:underline">Albums</a></h1>
+                <h1><a href="/" class="hover:underline">Albums</a></h1>
                 <span class="text-stone-500 sm:opacity-0 group-hover:opacity-100">(${Object.keys(state.albums).length})</span>
               </div>
               <div class="lg:col-span-4 md:col-span-2 col-span-1" role="search">

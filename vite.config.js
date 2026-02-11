@@ -1,5 +1,5 @@
 export default {
-  base: '/photo-albums/',
+  base: '',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
