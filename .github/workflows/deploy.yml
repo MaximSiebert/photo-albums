@@ -38,6 +38,9 @@ jobs:
       - name: Copy albums to dist
         run: cp -r albums dist/
 
+      - name: Copy CNAME to dist
+        run: cp CNAME dist/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
