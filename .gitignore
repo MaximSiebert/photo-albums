@@ -8,8 +8,9 @@
 *.svg
 *.tiff
 
-# But keep the JSON files
+# But keep the JSON files and PWA icons
 !*.json
+!icons/**
 
 # Node modules
 node_modules/
