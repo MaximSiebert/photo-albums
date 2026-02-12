@@ -41,6 +41,9 @@ jobs:
       - name: Copy CNAME to dist
         run: cp CNAME dist/
 
+      - name: Copy PWA assets to dist
+        run: cp manifest.json sw.js dist/ && cp -r icons dist/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
