@@ -1,5 +1,5 @@
 import { state, updateHash } from '../state.js';
-import { getImageUrl, generateSrcset, preloadNextImage } from '../utils/imageUtils.js';
+import { getImageUrl, generateSrcset, preloadNextImage, VIEWER_SRCSET_WIDTHS, VIEWER_QUALITY } from '../utils/imageUtils.js';
 import { applyAmbientLighting } from '../utils/colorUtils.js';
 
 let currentPhotoElement = null;
@@ -39,7 +39,7 @@ export function updateOverlaySelectionVisual() {
         const photoNum = parseInt(item.id.replace('overlay-photo-', ''));
         if (photoNum === state.selectedOverlayIndex) {
             item.classList.remove('outline-transparent');
-            item.classList.add('outline', 'outline-stone-800', 'dark:outline-stone-100');
+            item.classList.add('outline', 'outline-1', 'outline-stone-800', 'dark:outline-stone-100');
             // Remove hover outline classes to prevent conflict
             const img = item.querySelector('img');
             if (img) {
@@ -47,7 +47,7 @@ export function updateOverlaySelectionVisual() {
             }
         } else {
             // Remove selection outline completely
-            item.classList.remove('outline', 'outline-stone-800', 'dark:outline-stone-100');
+            item.classList.remove('outline', 'outline-1', 'outline-stone-800', 'dark:outline-stone-100');
             item.classList.add('outline-transparent');
             // Restore hover classes
             const img = item.querySelector('img');
@@ -138,9 +138,9 @@ export function renderPhotoViewer() {
                   <img
                       class="absolute inset-0 w-full h-full object-contain opacity-0"
                       id="photo-img"
-                      srcset="${generateSrcset(photoPath, [800, 1200, 1920], 85)}"
+                      srcset="${generateSrcset(photoPath, VIEWER_SRCSET_WIDTHS, VIEWER_QUALITY)}"
                       sizes="100vw"
-                      src="${getImageUrl(photoPath, { width: 1920, quality: 85, format: 'auto' })}"
+                      src="${getImageUrl(photoPath, { width: 1920, quality: VIEWER_QUALITY, format: 'auto' })}"
                       alt="${album.name}, photo ${state.currentPhoto} of ${album.photos.length}"
                       style="cursor: pointer"
                       loading="eager"
@@ -227,11 +227,11 @@ export function renderPhotoViewer() {
         const isCurrentPhoto = photoIndex === state.currentPhoto;
 
         const photoItem = document.createElement('div');
-        photoItem.className = `cursor-pointer ${isCurrentPhoto ? 'outline outline-stone-800 dark:outline-stone-100' : ''}`;
+        photoItem.className = `cursor-pointer ${isCurrentPhoto ? 'outline outline-1 outline-stone-800 dark:outline-stone-100' : ''}`;
         photoItem.id = `overlay-photo-${photoIndex}`;
 
         const img = document.createElement('img');
-        img.className = 'w-full h-auto hover:outline hover:outline-stone-800 dark:hover:outline-stone-100 outline outline-transparent';
+        img.className = 'w-full h-auto hover:outline hover:outline-stone-800 dark:hover:outline-stone-100 outline outline-1 outline-transparent';
         img.src = getImageUrl(`/albums/${encodeURIComponent(state.currentAlbum)}/${photoFilename}`, {
             width: 200,
             quality: 80,

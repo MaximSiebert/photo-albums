@@ -1,6 +1,36 @@
 import { state, updateHash } from '../state.js';
-import { getImageUrl, generateSrcset } from '../utils/imageUtils.js';
+import { getImageUrl, generateSrcset, preloadAlbumPhotos } from '../utils/imageUtils.js';
 import { resetAmbientLighting } from '../utils/colorUtils.js';
+
+const COVER_STORAGE_KEY = 'coverPhotos';
+let sessionCovers = null;
+
+// Pick a random cover photo per album once per browser session (tab), kept across reloads
+function getCoverPhoto(albumId, album) {
+    if (sessionCovers === null) {
+        try {
+            sessionCovers = JSON.parse(sessionStorage.getItem(COVER_STORAGE_KEY)) || {};
+        } catch (e) {
+            sessionCovers = {};
+        }
+    }
+
+    const getFilename = photo => typeof photo === 'string' ? photo : photo.filename;
+    let coverPhoto = album.photos.find(photo => getFilename(photo) === sessionCovers[albumId]);
+
+    if (!coverPhoto) {
+        // No cover chosen yet this session (or the stored photo was removed)
+        coverPhoto = album.photos[Math.floor(Math.random() * album.photos.length)];
+        sessionCovers[albumId] = getFilename(coverPhoto);
+        try {
+            sessionStorage.setItem(COVER_STORAGE_KEY, JSON.stringify(sessionCovers));
+        } catch (e) {
+            // Storage unavailable (e.g. private mode) - covers still work, just not persisted
+        }
+    }
+
+    return coverPhoto;
+}
 
 export function openAlbum(albumId) {
     // Save current scroll position before leaving album list
@@ -136,6 +166,10 @@ export function navigateAlbumSelection(direction, isVertical = false) {
     );
     if (selectedLi) {
         selectedLi.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // Preload the selected album's first images, same as on hover
+        const albumId = selectedLi.dataset.albumId;
+        preloadAlbumPhotos(state.albums[albumId], albumId, 0, 3);
     }
 }
 
@@ -274,13 +308,13 @@ export function renderAlbumList() {
 
         // Add cover image if available
         if (album.photos && album.photos.length > 0) {
-            // Get first photo (support both string and object format)
-            const firstPhoto = album.photos[0];
-            const firstPhotoFilename = typeof firstPhoto === 'string' ? firstPhoto : firstPhoto.filename;
+            // Get this session's random cover photo (support both string and object format)
+            const coverPhoto = getCoverPhoto(id, album);
+            const coverPhotoFilename = typeof coverPhoto === 'string' ? coverPhoto : coverPhoto.filename;
 
             // Get dimensions if available
-            const coverWidth = (typeof firstPhoto === 'object' && firstPhoto.width) ? firstPhoto.width : null;
-            const coverHeight = (typeof firstPhoto === 'object' && firstPhoto.height) ? firstPhoto.height : null;
+            const coverWidth = (typeof coverPhoto === 'object' && coverPhoto.width) ? coverPhoto.width : null;
+            const coverHeight = (typeof coverPhoto === 'object' && coverPhoto.height) ? coverPhoto.height : null;
             const coverAspectRatio = (coverWidth && coverHeight) ? `${coverWidth} / ${coverHeight}` : 'auto';
 
             // Create container with aspect ratio
@@ -300,13 +334,13 @@ export function renderAlbumList() {
             }, index * 100);
 
             const img = document.createElement('img');
-            img.className = 'relative z-10 w-full h-full object-contain group-hover:outline group-hover:outline-stone-800 dark:group-hover:outline-stone-100 outline outline-transparent opacity-0';
+            img.className = 'relative z-10 w-full h-full object-contain group-hover:outline group-hover:outline-stone-800 dark:group-hover:outline-stone-100 outline outline-1 outline-transparent opacity-0';
             img.dataset.albumIndex = index;
 
             // Store data for lazy loading
-            img.dataset.srcset = generateSrcset(`/albums/${encodeURIComponent(id)}/${firstPhotoFilename}`, [200, 400, 600, 800], 80);
+            img.dataset.srcset = generateSrcset(`/albums/${encodeURIComponent(id)}/${coverPhotoFilename}`, [200, 400, 600, 800], 80);
             img.dataset.sizes = '(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw';
-            img.dataset.src = getImageUrl(`/albums/${encodeURIComponent(id)}/${firstPhotoFilename}`, {
+            img.dataset.src = getImageUrl(`/albums/${encodeURIComponent(id)}/${coverPhotoFilename}`, {
                 width: 400,
                 quality: 80,
                 format: 'auto'
@@ -346,21 +380,11 @@ export function renderAlbumList() {
             openAlbum(id);
         };
 
-        // Preload first 3 images on hover
-        a.onmouseenter = () => {
-            if (album.photos && album.photos.length > 0) {
-                const photosToPreload = album.photos.slice(0, 3);
-                photosToPreload.forEach(photo => {
-                    const photoFilename = typeof photo === 'string' ? photo : photo.filename;
-                    const link = document.createElement('link');
-                    link.rel = 'prefetch';
-                    link.as = 'image';
-                    link.imageSrcset = generateSrcset(`/albums/${encodeURIComponent(id)}/${photoFilename}`, [800, 1200, 1920, 2560, 3840], 100);
-                    link.imageSizes = '100vw';
-                    document.head.appendChild(link);
-                });
-            }
-        };
+        // Preload first 3 images on hover/focus/touch so the viewer opens instantly
+        const preloadAlbum = () => preloadAlbumPhotos(album, id, 0, 3);
+        a.onmouseenter = preloadAlbum;
+        a.onfocus = preloadAlbum;
+        a.addEventListener('touchstart', preloadAlbum, { passive: true });
 
         li.appendChild(a);
         list.appendChild(li);

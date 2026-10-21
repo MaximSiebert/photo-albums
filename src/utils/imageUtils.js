@@ -26,29 +26,42 @@ export function generateSrcset(path, sizes, quality = 85) {
     ).join(', ');
 }
 
-// Preload next 5 images for faster navigation
-export function preloadNextImage(state) {
-    const album = state.albums[state.currentAlbum];
-    if (!album || state.currentPhoto >= album.photos.length) return;
+// Viewer image settings - preloads must match these exactly to hit the cache
+export const VIEWER_SRCSET_WIDTHS = [800, 1200, 1920];
+export const VIEWER_QUALITY = 85;
 
-    // Preload next 5 images (starting from next photo, not current)
-    for (let i = 1; i <= 5; i++) {
-        const photoIndex = state.currentPhoto + i - 1; // state.currentPhoto is 1-indexed, array is 0-indexed
-        if (photoIndex >= album.photos.length) break;
+const preloadedPaths = new Set();
 
-        const nextPhoto = album.photos[photoIndex];
-        if (!nextPhoto) continue;
+// Preload viewer-sized images for photos [startIndex, startIndex + count) of an album
+export function preloadAlbumPhotos(album, albumId, startIndex, count) {
+    const end = Math.min(startIndex + count, album.photos.length);
 
-        const nextPhotoFilename = typeof nextPhoto === 'string' ? nextPhoto : nextPhoto.filename;
-        const nextPhotoPath = `/albums/${encodeURIComponent(state.currentAlbum)}/${nextPhotoFilename}`;
+    for (let photoIndex = startIndex; photoIndex < end; photoIndex++) {
+        const photo = album.photos[photoIndex];
+        if (!photo) continue;
 
-        // Create link element for preloading
+        const photoFilename = typeof photo === 'string' ? photo : photo.filename;
+        const photoPath = `/albums/${encodeURIComponent(albumId)}/${photoFilename}`;
+        if (preloadedPaths.has(photoPath)) continue;
+        preloadedPaths.add(photoPath);
+
+        // Create link element for preloading (crossOrigin matches the viewer <img>)
         const link = document.createElement('link');
         link.rel = 'preload';
         link.as = 'image';
-        link.imageSrcset = generateSrcset(nextPhotoPath, [800, 1200, 1920], 85);
+        link.crossOrigin = 'anonymous';
+        link.imageSrcset = generateSrcset(photoPath, VIEWER_SRCSET_WIDTHS, VIEWER_QUALITY);
         link.imageSizes = '100vw';
 
         document.head.appendChild(link);
     }
+}
+
+// Preload next 5 images for faster navigation
+export function preloadNextImage(state) {
+    const album = state.albums[state.currentAlbum];
+    if (!album) return;
+
+    // state.currentPhoto is 1-indexed, so it's also the 0-indexed position of the next photo
+    preloadAlbumPhotos(album, state.currentAlbum, state.currentPhoto, 5);
 }
