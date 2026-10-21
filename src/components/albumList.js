@@ -334,7 +334,10 @@ export function renderAlbumList() {
             }, index * 100);
 
             const img = document.createElement('img');
-            img.className = 'relative z-10 w-full h-full object-contain group-hover:outline group-hover:outline-stone-800 dark:group-hover:outline-stone-100 outline outline-1 outline-transparent opacity-0';
+            // With known dimensions, position the image exactly like the placeholder so they always match;
+            // otherwise keep it in flow so it gives the container its height
+            const imgPosition = (coverWidth && coverHeight) ? 'absolute inset-0' : 'relative';
+            img.className = `${imgPosition} z-10 w-full h-full object-contain group-hover:outline group-hover:outline-stone-800 dark:group-hover:outline-stone-100 outline outline-1 outline-transparent opacity-0`;
             img.dataset.albumIndex = index;
 
             // Store data for lazy loading
@@ -393,9 +396,6 @@ export function renderAlbumList() {
     const reveal = (img) => {
         img.classList.remove('opacity-0');
         img.classList.add('animate-fade-in');
-
-        // Remove the placeholder after the fade so it can't peek out around the cover
-        setTimeout(() => img.previousElementSibling?.remove(), 400);
     };
 
     const processRevealQueue = () => {

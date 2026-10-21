@@ -134,7 +134,8 @@ export function renderPhotoViewer() {
             <div class="w-full h-dvh md:p-24 sm:p-12 p-6">
               <div class="w-full h-full relative flex items-center justify-center">
                 <div class="relative ${orientationClass}" style="aspect-ratio: ${aspectRatio}; container-type: size;">
-                  <div id="photo-placeholder" class="w-full h-full bg-black/5 dark:bg-white/10"></div>
+                  <!-- Positioned exactly like the photo, so it always matches its size (in-flow h-full overshoots on iOS) -->
+                  <div class="absolute inset-0 bg-black/5 dark:bg-white/10"></div>
                   <img
                       class="absolute inset-0 w-full h-full object-contain opacity-0"
                       id="photo-img"
@@ -306,13 +307,11 @@ export function renderPhotoViewer() {
     // Complete on actual image load
     const showPhoto = () => {
         clearInterval(progressInterval);
-        const placeholder = document.getElementById('photo-placeholder');
 
         if (performance.now() - renderStart < INSTANT_LOAD_MS) {
             // Already preloaded - show immediately without fading
             loadingBar.style.opacity = '0';
             photoImg.classList.remove('opacity-0');
-            placeholder?.classList.add('opacity-0');
         } else {
             loadingBar.style.width = '100%';
 
@@ -322,12 +321,6 @@ export function renderPhotoViewer() {
 
             photoImg.classList.remove('opacity-0');
             photoImg.classList.add('animate-fade-in');
-
-            // Hide the placeholder once the photo has faded in, so it can't peek out
-            // around the edges if the frame rounds slightly bigger than the photo (iOS)
-            setTimeout(() => {
-                placeholder?.classList.add('opacity-0');
-            }, 400);
         }
 
         // Store current photo element and apply ambient lighting
