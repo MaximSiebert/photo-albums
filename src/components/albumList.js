@@ -348,14 +348,6 @@ export function renderAlbumList() {
             img.alt = album.name;
             img.decoding = 'async';
 
-            // Add staggered fade-in animation after image loads (with 600ms base delay)
-            img.onload = () => {
-                setTimeout(() => {
-                    img.classList.remove('opacity-0');
-                    img.classList.add('animate-fade-in');
-                }, 600 + (index * 100)); // 600ms base delay + 100ms stagger per item
-            };
-
             imgContainer.appendChild(img);
             a.appendChild(imgContainer);
         }
@@ -390,6 +382,60 @@ export function renderAlbumList() {
         list.appendChild(li);
     });
 
+    // Reveal covers one after another in grid order, once each has loaded
+    const REVEAL_START_DELAY = 600; // Let the placeholders fade in first
+    const REVEAL_STAGGER = 100;
+    const REVEAL_MAX_WAIT = 1000; // Don't let one slow cover hold up the rest
+    const revealQueue = [];
+    let nextRevealAt = performance.now() + REVEAL_START_DELAY;
+    let revealTimer = null;
+
+    const reveal = (img) => {
+        img.classList.remove('opacity-0');
+        img.classList.add('animate-fade-in');
+
+        // Remove the placeholder after the fade so it can't peek out around the cover
+        setTimeout(() => img.previousElementSibling?.remove(), 400);
+    };
+
+    const processRevealQueue = () => {
+        revealTimer = null;
+        const head = revealQueue[0];
+        if (!head) return;
+
+        const now = performance.now();
+        if (now < nextRevealAt) {
+            revealTimer = setTimeout(processRevealQueue, nextRevealAt - now);
+            return;
+        }
+
+        if (head.complete) {
+            revealQueue.shift();
+            if (head.naturalWidth > 0) {
+                // Loaded - fade in and space out the next one
+                reveal(head);
+                nextRevealAt = now + REVEAL_STAGGER;
+            }
+            // Failed images (e.g. 404) are skipped and keep their placeholder
+            processRevealQueue();
+        } else if (now - head.revealQueuedAt > REVEAL_MAX_WAIT) {
+            // Still loading - move on and fade it in whenever it arrives
+            revealQueue.shift();
+            head.addEventListener('load', () => reveal(head), { once: true });
+            processRevealQueue();
+        } else {
+            // Wait for the head to finish (or for the max wait to run out)
+            const retry = () => {
+                if (revealQueue[0] !== head) return;
+                clearTimeout(revealTimer);
+                processRevealQueue();
+            };
+            head.addEventListener('load', retry, { once: true });
+            head.addEventListener('error', retry, { once: true });
+            revealTimer = setTimeout(processRevealQueue, head.revealQueuedAt + REVEAL_MAX_WAIT - now);
+        }
+    };
+
     // Lazy load images with Intersection Observer
     const imageObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
@@ -399,8 +445,13 @@ export function renderAlbumList() {
                 img.sizes = img.dataset.sizes;
                 img.src = img.dataset.src;
                 observer.unobserve(img);
+
+                // Queue for reveal in the order covers start loading (grid order)
+                img.revealQueuedAt = performance.now();
+                revealQueue.push(img);
             }
         });
+        if (!revealTimer) processRevealQueue();
     }, {
         rootMargin: '50px'
     });

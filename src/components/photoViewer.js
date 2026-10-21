@@ -134,7 +134,7 @@ export function renderPhotoViewer() {
             <div class="w-full h-dvh md:p-24 sm:p-12 p-6">
               <div class="w-full h-full relative flex items-center justify-center">
                 <div class="relative ${orientationClass}" style="aspect-ratio: ${aspectRatio}; container-type: size;">
-                  <div class="w-full h-full bg-black/5 dark:bg-white/10"></div>
+                  <div id="photo-placeholder" class="w-full h-full bg-black/5 dark:bg-white/10"></div>
                   <img
                       class="absolute inset-0 w-full h-full object-contain opacity-0"
                       id="photo-img"
@@ -300,22 +300,46 @@ export function renderPhotoViewer() {
         loadingBar.style.width = `${progress}%`;
     }, 50);
 
+    const renderStart = performance.now();
+    const INSTANT_LOAD_MS = 100; // Loads faster than this came from the preload cache
+
     // Complete on actual image load
-    photoImg.onload = () => {
+    const showPhoto = () => {
         clearInterval(progressInterval);
-        loadingBar.style.width = '100%';
+        const placeholder = document.getElementById('photo-placeholder');
 
-        setTimeout(() => {
+        if (performance.now() - renderStart < INSTANT_LOAD_MS) {
+            // Already preloaded - show immediately without fading
             loadingBar.style.opacity = '0';
-        }, 150);
+            photoImg.classList.remove('opacity-0');
+            placeholder?.classList.add('opacity-0');
+        } else {
+            loadingBar.style.width = '100%';
 
-        photoImg.classList.remove('opacity-0');
-        photoImg.classList.add('animate-fade-in');
+            setTimeout(() => {
+                loadingBar.style.opacity = '0';
+            }, 150);
+
+            photoImg.classList.remove('opacity-0');
+            photoImg.classList.add('animate-fade-in');
+
+            // Hide the placeholder once the photo has faded in, so it can't peek out
+            // around the edges if the frame rounds slightly bigger than the photo (iOS)
+            setTimeout(() => {
+                placeholder?.classList.add('opacity-0');
+            }, 400);
+        }
 
         // Store current photo element and apply ambient lighting
         currentPhotoElement = photoImg;
         applyAmbientLighting(photoImg);
     };
+
+    if (photoImg.complete && photoImg.naturalWidth > 0) {
+        showPhoto();
+    } else {
+        photoImg.onload = showPhoto;
+    }
 
     photoImg.onerror = () => {
         clearInterval(progressInterval);
