@@ -65,6 +65,9 @@ npm run preview
    rclone sync ./albums r2:my-photo-albums/albums --progress --exclude "*.DS_Store" --exclude ".git/*"
    ```
 
+### Hidden albums
+Prefix a folder name with `_` (e.g. `_Jenna's Cottage '26`) to keep it off the site. The generator skips it and git ignores it, so it never appears in `albums.json` or gets deployed, but `rclone sync` still uploads it to R2.
+
 ## Deployment
 
 ### GitHub Actions (Automatic)

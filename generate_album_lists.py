@@ -29,6 +29,17 @@ def get_image_capture_date(image_path):
 # Get all album folders
 album_folders = [d for d in albums_dir.iterdir() if d.is_dir()]
 
+# Albums starting with _ are hidden: still synced to R2, but never listed or deployed
+hidden_folders = [d for d in album_folders if d.name.startswith('_')]
+album_folders = [d for d in album_folders if not d.name.startswith('_')]
+
+for hidden_folder in hidden_folders:
+    # Remove any photos.json left over from when the album was visible
+    stale_photos_json = hidden_folder / 'photos.json'
+    if stale_photos_json.exists():
+        stale_photos_json.unlink()
+    print(f"Skipped hidden album {hidden_folder.name}")
+
 # Generate list of album IDs for albums.json
 album_ids = []
 
