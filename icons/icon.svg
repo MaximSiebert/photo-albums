@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#ffffff"/>
-  <!-- Splitfocus logo (384x312 artwork), same size as the splitfocus apple-touch icon, centred -->
+  <rect width="512" height="512" fill="#f9fafb"/>
+  <!-- Colours match the syft app icon. Splitfocus logo (384x312 artwork), same size as the splitfocus apple-touch icon, centred -->
   <g transform="translate(72.54 106) scale(0.9555)">
-    <path d="M312 193C312 126.726 258.274 73 192 73C125.726 73 72 126.726 72 193H0C0 86.9613 85.9613 1 192 1C298.039 1 384 86.9613 384 193H312Z" fill="#18181B"/>
-    <path d="M192 313C258.274 313 312 259.274 312 193H72C72 259.274 125.726 313 192 313Z" fill="#18181B"/>
+    <path d="M312 193C312 126.726 258.274 73 192 73C125.726 73 72 126.726 72 193H0C0 86.9613 85.9613 1 192 1C298.039 1 384 86.9613 384 193H312Z" fill="#000000"/>
+    <path d="M192 313C258.274 313 312 259.274 312 193H72C72 259.274 125.726 313 192 313Z" fill="#000000"/>
   </g>
 </svg>
