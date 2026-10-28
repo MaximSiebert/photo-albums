@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#f9fafb"/>
-  <!-- Manifest (Mac/Android/iOS Clear) icon: light grey mark like syft's manifest icons, so iOS Clear mode keeps a white tile. Splitfocus logo (384x312 artwork) scaled to 252px wide, the same width as syft's mark, centred -->
-  <g transform="translate(130 152.97) scale(0.65625)">
+  <!-- Manifest (Mac/Android/iOS Clear) icon: light grey mark like syft's manifest icons, so iOS Clear mode keeps a white tile. Splitfocus logo (384x312 artwork) scaled to 280px wide so it looks the same size as syft's 252px round mark, centred -->
+  <g transform="translate(116 141.52) scale(0.72917)">
     <path d="M312 193C312 126.726 258.274 73 192 73C125.726 73 72 126.726 72 193H0C0 86.9613 85.9613 1 192 1C298.039 1 384 86.9613 384 193H312Z" fill="#d2d5db"/>
     <path d="M192 313C258.274 313 312 259.274 312 193H72C72 259.274 125.726 313 192 313Z" fill="#d2d5db"/>
   </g>
