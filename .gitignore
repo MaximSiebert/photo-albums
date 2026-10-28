@@ -11,6 +11,7 @@
 # But keep the JSON files and PWA icons
 !*.json
 !icons/**
+!public/**
 
 # Hidden albums (prefixed with _) - synced to R2 only, never committed or deployed
 albums/_*/

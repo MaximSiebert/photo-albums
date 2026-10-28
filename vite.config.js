@@ -11,6 +11,6 @@ export default {
       }
     }
   },
-  // Don't copy public folder, we'll keep albums in root
-  publicDir: false
+  // Icons, manifest and service worker are served from the site root with fixed names (like syft)
+  publicDir: 'public'
 }
