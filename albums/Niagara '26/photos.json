@@ -1,0 +1,356 @@
+{
+  "name": "Niagara '26",
+  "photos": [
+    {
+      "filename": "DSCF7377.jpg",
+      "width": 3839,
+      "height": 2538
+    },
+    {
+      "filename": "DSCF7381.jpg",
+      "width": 3840,
+      "height": 2508
+    },
+    {
+      "filename": "DSCF7385.jpg",
+      "width": 2560,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7387.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7389.jpg",
+      "width": 2560,
+      "height": 3839
+    },
+    {
+      "filename": "DSCF7392.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7394.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7395.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7398.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7411.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7412.jpg",
+      "width": 2560,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7415.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7418.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7419.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7421.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7422.jpg",
+      "width": 2541,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7424.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7425.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7428.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7432.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7433.jpg",
+      "width": 2560,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7434.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7437.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7439.jpg",
+      "width": 2559,
+      "height": 3839
+    },
+    {
+      "filename": "DSCF7440.jpg",
+      "width": 2560,
+      "height": 3839
+    },
+    {
+      "filename": "DSCF7441.jpg",
+      "width": 2560,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7447.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7448.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7449.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7450.jpg",
+      "width": 2514,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7451.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7452.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7454.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7456.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7459.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7468.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7469.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7471.jpg",
+      "width": 2560,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7472.jpg",
+      "width": 2560,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7473.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7477.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7484.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7485.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7488.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7492.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7494.jpg",
+      "width": 2560,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7500.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7501.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7502.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7503.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7504.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7505.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7506.jpg",
+      "width": 2560,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7508.jpg",
+      "width": 2560,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7511.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7517.jpg",
+      "width": 2560,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7518.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7519.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7520.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7521.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7522.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7528.jpg",
+      "width": 2560,
+      "height": 3839
+    },
+    {
+      "filename": "DSCF7533.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7534.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7536.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7542.jpg",
+      "width": 3840,
+      "height": 2560
+    },
+    {
+      "filename": "DSCF7544.jpg",
+      "width": 2559,
+      "height": 3840
+    },
+    {
+      "filename": "DSCF7550.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7552.jpg",
+      "width": 3840,
+      "height": 2559
+    },
+    {
+      "filename": "DSCF7554.jpg",
+      "width": 3840,
+      "height": 2560
+    }
+  ],
+  "created": "2026-10-10T07:46:48"
+}

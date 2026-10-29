@@ -62,6 +62,7 @@ npm run preview
 4. Upload album to R2 Cloudflare using:
    ```
    bash
+   
    rclone sync ./albums r2:my-photo-albums/albums --progress --exclude "*.DS_Store" --exclude ".git/*"
    ```
 
